@@ -4,7 +4,7 @@
   "description": "Tienda Oficial ÚNICA Perfumería",
   "private": true,
   "scripts": {
-    "build": "npm --prefix backend install && npm --prefix frontend install && npm --prefix frontend run build",
+    "build": "npm --prefix backend install --include=dev && npm --prefix frontend install --include=dev && npm --prefix frontend run build",
     "start": "node backend/src/index.js",
     "seed": "npm --prefix backend run seed",
     "dev:backend": "npm --prefix backend run dev",
