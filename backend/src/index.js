@@ -17,12 +17,17 @@ import path from 'path';
 import fs from 'fs';
 
 dotenv.config();
+if (fs.existsSync(path.join(process.cwd(), 'backend/.env'))) {
+  dotenv.config({ path: path.join(process.cwd(), 'backend/.env') });
+}
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 // Ensure uploads directory exists
-const uploadsDir = path.join(process.cwd(), 'uploads');
+const uploadsDir = fs.existsSync(path.join(process.cwd(), 'backend'))
+  ? path.join(process.cwd(), 'backend/uploads')
+  : path.join(process.cwd(), 'uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
@@ -101,6 +106,24 @@ app.post('/api/analytics/visit', async (req, res) => {
     res.json({ success: false });
   }
 });
+
+// Serve Frontend SPA in unified deployment
+const possibleDistPaths = [
+  path.join(process.cwd(), 'frontend/dist'),
+  path.join(process.cwd(), '../frontend/dist'),
+  path.join(process.cwd(), 'dist')
+];
+const frontendDist = possibleDistPaths.find(p => fs.existsSync(p));
+if (frontendDist) {
+  console.log(`📂 Sirviendo Frontend estático desde: ${frontendDist}`);
+  app.use(express.static(frontendDist));
+  app.use((req, res, next) => {
+    if (req.method !== 'GET' || req.path.startsWith('/api') || req.path.startsWith('/uploads') || req.path.startsWith('/catalog')) {
+      return next();
+    }
+    res.sendFile(path.join(frontendDist, 'index.html'));
+  });
+}
 
 // Start server
 app.listen(port, async () => {
