@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" width="100%" height="100%">
+  <defs>
+    <linearGradient id="roseGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f43f5e" />
+      <stop offset="50%" stop-color="#be123c" />
+      <stop offset="100%" stop-color="#881337" />
+    </linearGradient>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fde047" />
+      <stop offset="100%" stop-color="#ca8a04" />
+    </linearGradient>
+  </defs>
+  <!-- Icon: Fragrance Spark / Drop -->
+  <g transform="translate(10, 15)">
+    <circle cx="25" cy="25" r="22" fill="url(#roseGold)" opacity="0.15" />
+    <circle cx="25" cy="25" r="18" fill="none" stroke="url(#roseGold)" stroke-width="2" />
+    <path d="M25 14 C25 14 33 24 33 29 A8 8 0 0 1 17 29 C17 24 25 14 25 14 Z" fill="url(#roseGold)" />
+    <circle cx="25" cy="30" r="2.5" fill="#ffffff" />
+  </g>
+  <!-- Text: UNICA -->
+  <text x="68" y="44" font-family="'Cinzel', 'Playfair Display', 'Bodoni MT', 'Times New Roman', serif" font-size="34" font-weight="800" fill="#ffffff" letter-spacing="4">UNICA</text>
+  <!-- Subtitle -->
+  <text x="70" y="60" font-family="'Montserrat', 'Helvetica Neue', sans-serif" font-size="8.5" font-weight="600" fill="#fb7185" letter-spacing="3.5">ESENCIALMENTE BUENO</text>
+  <!-- Badge: Edición 50 -->
+  <g transform="translate(255, 18)">
+    <rect width="52" height="20" rx="10" fill="url(#gold)" />
+    <text x="26" y="14" font-family="sans-serif" font-size="9" font-weight="800" fill="#78350f" text-anchor="middle">ED. 50</text>
+  </g>
+</svg>
