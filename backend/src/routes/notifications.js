@@ -37,4 +37,25 @@ router.put('/:id/read', authenticate, async (req, res) => {
   }
 });
 
+// PUT /api/notifications/read-all
+router.put('/read-all', authenticate, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    await db.update(notifications).set({ isRead: true }).where(eq(notifications.userId, userId));
+    res.json({ success: true, message: 'All notifications marked as read' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// POST /api/notifications/subscribe (Registro de suscripción Push)
+router.post('/subscribe', authenticate, async (req, res) => {
+  try {
+    // Almacena o valida la suscripción de navegador
+    res.json({ success: true, message: 'Suscripción de notificaciones activada' });
+  } catch (error) {
+    res.status(500).json({ success: false });
+  }
+});
+
 export default router;

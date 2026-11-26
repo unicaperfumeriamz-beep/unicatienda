@@ -14,29 +14,19 @@ export async function runSeed() {
   console.log('🌸 Iniciando Seed para ÚNICA Perfumería...');
 
   try {
-    // 1. Usuarios Administradores
-    const adminPass = await hashPassword('admin123');
-    await db.insert(users).values([
-      {
-        id: crypto.randomUUID(),
-        name: 'Administrador ÚNICA',
-        email: 'admin@unicaperfumeria.com',
-        passwordHash: adminPass,
-        role: 'ADMIN',
-        points: 5000,
-        createdAt: new Date(),
-      },
-      {
-        id: crypto.randomUUID(),
-        name: 'Admin Global',
-        email: 'admin@tienda.com',
-        passwordHash: adminPass,
-        role: 'ADMIN',
-        points: 5000,
-        createdAt: new Date(),
-      }
-    ]).onConflictDoNothing();
-    console.log('✅ Usuarios administradores listos');
+    // 1. Usuario Administrador Único
+    const adminPass = await hashPassword('mendo1234');
+    await db.delete(users).where(eq(users.role, 'ADMIN'));
+    await db.insert(users).values({
+      id: crypto.randomUUID(),
+      name: 'ÚNICA Perfumería',
+      email: 'unica.perfumeria.mz@gmail.com',
+      passwordHash: adminPass,
+      role: 'ADMIN',
+      points: 0,
+      createdAt: new Date(),
+    }).onConflictDoNothing();
+    console.log('✅ Usuario administrador único listo: unica.perfumeria.mz@gmail.com');
 
     // 2. Cargar Catálogo UNICA 50
     const catalogPath = path.join(__dirname, 'catalog_unica_50.json');
@@ -92,8 +82,8 @@ export async function runSeed() {
         sku: prod.sku,
         imageUrl: prod.imageUrl,
         categoryId: catId,
-        views: Math.floor(Math.random() * 50) + 10,
-        salesCount: Math.floor(Math.random() * 15),
+        views: 0,
+        salesCount: 0,
         active: true,
         createdAt: new Date(),
         updatedAt: new Date(),

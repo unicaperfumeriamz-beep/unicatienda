@@ -262,7 +262,7 @@ export default function Checkout() {
                 </div>
                 <div className="flex justify-between text-slate-500">
                   <span>Envío</span>
-                  <span className="font-bold text-emerald-500">¡Gratis!</span>
+                  <span className="font-semibold text-zinc-700">A coordinar</span>
                 </div>
                 {discountVisual > 0 && (
                   <div className="flex justify-between text-emerald-600 font-medium">

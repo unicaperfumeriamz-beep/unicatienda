@@ -168,10 +168,10 @@ export default function ProductDetail() {
               )}
             </div>
 
-            <div className="flex items-center gap-3 text-emerald-600 text-sm font-semibold mb-2">
-              <Truck size={20} /> Llega gratis hoy
+            <div className="flex items-center gap-3 text-zinc-700 text-sm font-semibold mb-1">
+              <Truck size={20} className="text-rose-500" /> Envíos a todo el país
             </div>
-            <div className="text-zinc-500 text-xs mb-8">Solo en CABA y zonas de GBA comprando antes de las 14hs</div>
+            <div className="text-zinc-500 text-xs mb-8">Coordinamos el envío directamente a tu domicilio o sucursal</div>
 
             {product.stock > 0 ? (
               <div className="mb-8 space-y-4">

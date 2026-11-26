@@ -164,4 +164,84 @@ router.get('/referrals/status', async (req, res) => {
   }
 });
 
+// POST /api/auth/reset-password (Recuperar o cambiar contraseña con email)
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
+    if (!email || !newPassword) {
+      return res.status(400).json({ success: false, message: 'Email y nueva contraseña requeridos' });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ success: false, message: 'La contraseña debe tener al menos 6 caracteres' });
+    }
+
+    const userRec = await db.select().from(users).where(eq(users.email, email.trim())).limit(1);
+    if (userRec.length === 0) {
+      return res.status(404).json({ success: false, message: 'No existe una cuenta asociada a este correo electrónico' });
+    }
+
+    const hashedPassword = await hashPassword(newPassword);
+    await db.update(users).set({ passwordHash: hashedPassword }).where(eq(users.email, email.trim()));
+
+    res.json({ success: true, message: 'Contraseña restablecida exitosamente. Ya puedes iniciar sesión con tu nueva clave.' });
+  } catch (error) {
+    console.error('Error restableciendo contraseña:', error);
+    res.status(500).json({ success: false, message: 'Error interno del servidor' });
+  }
+});
+
+// PUT /api/auth/profile (Actualizar datos de perfil y cambiar contraseña del usuario logueado)
+router.put('/profile', authenticate, async (req, res) => {
+  try {
+    const { name, phone, address, currentPassword, newPassword } = req.body;
+    const userRec = await db.select().from(users).where(eq(users.id, req.user.id)).limit(1);
+    if (userRec.length === 0) {
+      return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+    }
+    const user = userRec[0];
+
+    const updates = {};
+    if (name) updates.name = name.trim();
+    if (phone !== undefined) updates.phone = phone.trim();
+    if (address !== undefined) updates.address = address.trim();
+
+    if (newPassword) {
+      if (!currentPassword) {
+        return res.status(400).json({ success: false, message: 'Debes ingresar tu contraseña actual para cambiarla' });
+      }
+      if (user.passwordHash && !(await verifyPassword(user.passwordHash, currentPassword))) {
+        return res.status(401).json({ success: false, message: 'La contraseña actual ingresada es incorrecta' });
+      }
+      if (newPassword.length < 6) {
+        return res.status(400).json({ success: false, message: 'La nueva contraseña debe tener al menos 6 caracteres' });
+      }
+      updates.passwordHash = await hashPassword(newPassword);
+    }
+
+    await db.update(users).set(updates).where(eq(users.id, req.user.id));
+
+    const updatedUser = await db.select().from(users).where(eq(users.id, req.user.id)).limit(1);
+    const u = updatedUser[0];
+
+    res.json({
+      success: true,
+      message: 'Perfil y credenciales actualizados exitosamente',
+      data: {
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        phone: u.phone,
+        address: u.address,
+        role: u.role,
+        points: u.points || 0,
+        referralCode: u.referralCode
+      }
+    });
+  } catch (error) {
+    console.error('Error actualizando perfil:', error);
+    res.status(500).json({ success: false, message: 'Error interno del servidor' });
+  }
+});
+
 export default router;

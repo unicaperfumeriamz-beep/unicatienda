@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import api from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   CheckCircle2, 
   AlertCircle, 
@@ -34,6 +34,17 @@ export default function Home() {
   const { addToCart } = useCart();
   const navigate = useNavigate();
   const [modal, setModal] = useState({ show: false, message: '', isSuccess: true });
+
+  const [searchParams] = useSearchParams();
+  const urlSearch = searchParams.get('search') || '';
+  const urlCategory = searchParams.get('category') || '';
+  const urlOfertas = searchParams.get('ofertas') === 'true';
+
+  useEffect(() => {
+    if (urlSearch) setSearchQuery(urlSearch);
+    if (urlCategory) setSelectedCategory(urlCategory);
+    if (urlOfertas) setSortBy('promo');
+  }, [urlSearch, urlCategory, urlOfertas]);
 
   const toggleViewMode = (mode) => {
     setViewMode(mode);
@@ -86,11 +97,13 @@ export default function Home() {
     const matchesSearch = !searchQuery.trim() || 
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.description?.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
+    const matchesOffers = !urlOfertas || (product.promotionalPrice && product.promotionalPrice < product.price);
+    return matchesCategory && matchesSearch && matchesOffers;
   }).sort((a, b) => {
     if (sortBy === 'price-asc') return a.price - b.price;
     if (sortBy === 'price-desc') return b.price - a.price;
     if (sortBy === 'points-desc') return (b.points || 0) - (a.points || 0);
+    if (sortBy === 'promo') return (b.promotionalPrice ? 1 : 0) - (a.promotionalPrice ? 1 : 0);
     return 0;
   });
 
@@ -160,7 +173,7 @@ export default function Home() {
       )}
 
       {/* Catálogo de Productos y Filtros */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
+      <div id="catalogo" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 scroll-mt-24">
         
         {/* Filtros de Categorías Dinámicas */}
         {categories.length > 0 && (
@@ -412,8 +425,8 @@ export default function Home() {
                         )}
                       </div>
                       
-                      <p className="text-[11px] text-emerald-600 font-bold mt-1 flex items-center gap-1">
-                        <Truck size={12} /> Envío gratis
+                      <p className="text-[11px] text-zinc-500 font-bold mt-1 flex items-center gap-1">
+                        <Truck size={12} className="text-rose-500" /> Envíos a todo el país
                       </p>
                     </div>
                   </div>
@@ -497,8 +510,8 @@ export default function Home() {
                     )}
 
                     <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-xs font-bold text-slate-500 pt-2">
-                      <span className="flex items-center gap-1.5 text-emerald-600">
-                        <Truck size={15} /> Envío gratis a todo el país
+                      <span className="flex items-center gap-1.5 text-zinc-500">
+                        <Truck size={15} className="text-rose-500" /> Envíos a todo el país
                       </span>
                       <span>•</span>
                       <span className={product.stock > 0 ? 'text-slate-600' : 'text-red-500'}>

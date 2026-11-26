@@ -10,6 +10,7 @@ import Orders from './pages/Orders'
 import Referrals from './pages/Referrals'
 import Admin from './pages/Admin'
 import ProductDetail from './pages/ProductDetail'
+import Profile from './pages/Profile'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import { useAuth } from './contexts/AuthContext'
@@ -39,6 +40,7 @@ function App() {
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/orders" element={<Orders />} />
+              <Route path="/profile" element={<Profile />} />
               <Route path="/referrals" element={<Referrals />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="/product/:id" element={<ProductDetail />} />

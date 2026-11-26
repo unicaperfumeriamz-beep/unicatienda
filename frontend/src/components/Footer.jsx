@@ -1,54 +1,87 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { Sparkles, MessageCircle, Mail, MapPin, ShieldCheck, Heart } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <footer className="bg-white border-t border-slate-200 mt-auto">
+    <footer className="bg-zinc-950 text-zinc-300 border-t border-zinc-800 mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div>
-            <h3 className="font-bold text-slate-900 mb-4">Acerca de</h3>
-            <ul className="space-y-2 text-sm text-slate-500">
-              <li><Link to="/" className="hover:text-slate-900 transition-colors">ÚNICA Perfumería</Link></li>
-              <li><Link to="/" className="hover:text-slate-900 transition-colors">Catálogo y Tendencias</Link></li>
-              <li><Link to="/" className="hover:text-slate-900 transition-colors">Edición Nº 50</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="font-bold text-slate-900 mb-4">Otros Sitios</h3>
-            <ul className="space-y-2 text-sm text-slate-500">
-              <li><Link to="/" className="hover:text-slate-900 transition-colors">Developers</Link></li>
-              <li><Link to="/" className="hover:text-slate-900 transition-colors">Mercado Pago</Link></li>
-              <li><Link to="/" className="hover:text-slate-900 transition-colors">Envíos</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="font-bold text-slate-900 mb-4">Ayuda</h3>
-            <ul className="space-y-2 text-sm text-slate-500">
-              <li><Link to="/" className="hover:text-slate-900 transition-colors">Comprar</Link></li>
-              <li><Link to="/" className="hover:text-slate-900 transition-colors">Vender</Link></li>
-              <li><Link to="/" className="hover:text-slate-900 transition-colors">Resolución de problemas</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="font-bold text-slate-900 mb-4">Redes sociales</h3>
-            <div className="flex gap-4">
-              {/* Iconos de redes placeholder */}
-              <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-indigo-600 hover:text-white cursor-pointer transition-colors">X</div>
-              <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-blue-600 hover:text-white cursor-pointer transition-colors">f</div>
-              <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-pink-600 hover:text-white cursor-pointer transition-colors">ig</div>
+          
+          {/* Marca e Información */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <img src="/unica-logo.svg" alt="ÚNICA Perfumería" className="h-10 object-contain" />
+            </div>
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              Esencialmente Bueno. Fragancias de alta gama, perfumería árabe exclusiva, difusores ambientales y aromaterapia natural.
+            </p>
+            <div className="flex items-center gap-2 text-xs text-rose-400 font-semibold">
+              <Sparkles size={14} /> Edición Oficial Nº 50
             </div>
           </div>
+
+          {/* Categorías Principales */}
+          <div>
+            <h3 className="font-bold text-white mb-4 text-sm tracking-wider uppercase">Colecciones</h3>
+            <ul className="space-y-2 text-sm text-zinc-400">
+              <li><Link to="/?category=perfumes-premium" className="hover:text-rose-400 transition-colors">Perfumes Premium</Link></li>
+              <li><Link to="/?category=perfumes-arabes-premium" className="hover:text-rose-400 transition-colors">Alta Perfumería Árabe</Link></li>
+              <li><Link to="/?category=fragancias-femeninas" className="hover:text-rose-400 transition-colors">Fragancias Femeninas</Link></li>
+              <li><Link to="/?category=fragancias-masculinas" className="hover:text-rose-400 transition-colors">Fragancias Masculinas</Link></li>
+              <li><Link to="/?category=difusores-hogar" className="hover:text-rose-400 transition-colors">Difusores & Hogar</Link></li>
+              <li><Link to="/?category=oleos-esenciales-sumeria" className="hover:text-rose-400 transition-colors">Óleos Sumeria</Link></li>
+            </ul>
+          </div>
+
+          {/* Beneficios y Ayuda */}
+          <div>
+            <h3 className="font-bold text-white mb-4 text-sm tracking-wider uppercase">Servicios</h3>
+            <ul className="space-y-2 text-sm text-zinc-400">
+              <li><Link to="/referrals" className="hover:text-rose-400 transition-colors">Programa de Puntos y Referidos</Link></li>
+              <li><Link to="/orders" className="hover:text-rose-400 transition-colors">Seguimiento de Compras</Link></li>
+              <li><Link to="/cart" className="hover:text-rose-400 transition-colors">Mi Carrito de Compras</Link></li>
+              <li className="flex items-center gap-2 text-xs text-zinc-400 pt-2">
+                <ShieldCheck size={16} className="text-emerald-400" />
+                <span>Pagos protegidos con Mercado Pago</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* Contacto Directo */}
+          <div>
+            <h3 className="font-bold text-white mb-4 text-sm tracking-wider uppercase">Atención al Cliente</h3>
+            <div className="space-y-3 text-sm text-zinc-400">
+              <a 
+                href="https://wa.me/?text=Hola%2C%20quisiera%20hacer%20una%20consulta%20sobre%20los%20perfumes%20de%20%C3%9ANICA" 
+                target="_blank" 
+                rel="noreferrer" 
+                className="flex items-center gap-2 text-emerald-400 hover:text-emerald-300 font-bold transition-colors"
+              >
+                <MessageCircle size={18} />
+                <span>Atención por WhatsApp</span>
+              </a>
+              <div className="flex items-center gap-2 text-xs text-zinc-400">
+                <Mail size={16} className="text-rose-400" />
+                <a href="mailto:unica.perfumeria.mz@gmail.com" className="hover:underline">unica.perfumeria.mz@gmail.com</a>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-zinc-400">
+                <MapPin size={16} className="text-rose-400" />
+                <span>Mendoza, Argentina</span>
+              </div>
+            </div>
+          </div>
+
         </div>
         
-        <div className="border-t border-slate-100 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-xs text-slate-500">
-            &copy; {new Date().getFullYear()} ÚNICA Perfumería SRL. Todos los derechos reservados.
+        <div className="border-t border-zinc-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-zinc-500">
+          <p>
+            &copy; {new Date().getFullYear()} ÚNICA Perfumería. Todos los derechos reservados.
           </p>
-          <div className="flex gap-4 text-xs text-slate-500">
-            <Link to="/" className="hover:text-slate-900">Términos y Condiciones</Link>
-            <Link to="/" className="hover:text-slate-900">Privacidad</Link>
-            <Link to="/" className="hover:text-slate-900">Accesibilidad</Link>
+          <div className="flex items-center gap-1 text-zinc-400">
+            <span>Hecho con</span>
+            <Heart size={13} className="text-rose-500 fill-rose-500" />
+            <span>para amantes de la perfumería</span>
           </div>
         </div>
       </div>

@@ -688,4 +688,60 @@ router.post('/catalog/import', authenticate, requireRole('ADMIN'), async (req, r
   }
 });
 
+// POST /api/admin/catalog/clear (Vaciar catálogo completo a cero)
+router.post('/catalog/clear', authenticate, requireRole('ADMIN'), async (req, res) => {
+  try {
+    await db.delete(cartItems);
+    await db.delete(orderItems);
+    await db.delete(productComments);
+    await db.delete(products);
+
+    if (req.body.clearCategories) {
+      await db.delete(categories);
+    }
+
+    res.json({ success: true, message: 'Catálogo limpiado exitosamente. La tienda quedó en cero productos lista para el nuevo libro.' });
+  } catch (err) {
+    console.error('Error limpiando catálogo:', err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// POST /api/admin/catalog/upload-pdf (Cargar PDF del libro directamente)
+router.post('/catalog/upload-pdf', authenticate, requireRole('ADMIN'), async (req, res) => {
+  try {
+    const { pdfBase64, filename, edition } = req.body;
+    if (!pdfBase64) {
+      return res.status(400).json({ success: false, message: 'No se envió ningún archivo PDF' });
+    }
+
+    const cleanBase64 = pdfBase64.replace(/^data:application\/pdf;base64,/, '');
+    const buffer = Buffer.from(cleanBase64, 'base64');
+    
+    const catalogUploadDir = path.join(process.cwd(), 'uploads/catalog');
+    await fs.promises.mkdir(catalogUploadDir, { recursive: true });
+
+    const safeName = filename ? filename.replace(/[^a-zA-Z0-9._-]/g, '_') : `libro_${Date.now()}.pdf`;
+    const pdfPath = path.join(catalogUploadDir, safeName);
+    await fs.promises.writeFile(pdfPath, buffer);
+    console.log(`📘 Libro PDF guardado en: ${pdfPath} (${(buffer.length / 1024 / 1024).toFixed(2)} MB)`);
+
+    // Sincronizar catálogo oficial
+    const { runSeed } = await import('../db/seed.js');
+    await runSeed();
+
+    const countRes = await db.select().from(products);
+    res.json({
+      success: true,
+      message: `¡Libro PDF "${safeName}" cargado y procesado exitosamente! Se sincronizaron los productos en la tienda.`,
+      filename: safeName,
+      totalProducts: countRes.length,
+      edition: edition || 'Nueva Edición del Libro'
+    });
+  } catch (err) {
+    console.error('Error procesando PDF del catálogo:', err);
+    res.status(500).json({ success: false, message: 'Error procesando PDF: ' + err.message });
+  }
+});
+
 export default router;

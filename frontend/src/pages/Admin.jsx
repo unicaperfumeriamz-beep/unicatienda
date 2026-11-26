@@ -194,6 +194,64 @@ export default function Admin() {
     }
   };
 
+  const handleClearCatalog = async () => {
+    if (!window.confirm('¿Estás seguro de que deseas vaciar por completo el catálogo? Se borrarán los productos actuales para dejar la tienda lista para el nuevo libro.')) return;
+    try {
+      setSyncingCatalog(true);
+      toast.loading('Vaciando catálogo...', { id: 'clear-cat' });
+      const res = await api.post('/admin/catalog/clear');
+      if (res.data.success) {
+        toast.success(res.data.message || 'Catálogo limpiado con éxito', { id: 'clear-cat' });
+        fetchData();
+      } else {
+        toast.error(res.data.message || 'Error al vaciar catálogo', { id: 'clear-cat' });
+      }
+    } catch (err) {
+      toast.error('Error: ' + (err.response?.data?.message || err.message), { id: 'clear-cat' });
+    } finally {
+      setSyncingCatalog(false);
+    }
+  };
+
+  const handlePdfUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.name.toLowerCase().endsWith('.pdf')) {
+      toast.error('Por favor selecciona un archivo PDF (.pdf)');
+      return;
+    }
+    try {
+      setSyncingCatalog(true);
+      toast.loading(`Subiendo y procesando libro PDF "${file.name}"...`, { id: 'upload-pdf' });
+      const reader = new FileReader();
+      reader.onload = async () => {
+        try {
+          const base64 = reader.result.split(',')[1];
+          const res = await api.post('/admin/catalog/upload-pdf', {
+            pdfBase64: base64,
+            filename: file.name,
+            edition: catalogModal.edition || file.name.replace(/\.[^/.]+$/, "")
+          });
+          if (res.data.success) {
+            toast.success(res.data.message || '¡Libro PDF cargado y procesado exitosamente!', { id: 'upload-pdf' });
+            setCatalogModal({ isOpen: false, edition: '', rawJson: '', fileLoading: false });
+            fetchData();
+          } else {
+            toast.error(res.data.message || 'Error procesando PDF', { id: 'upload-pdf' });
+          }
+        } catch (postErr) {
+          toast.error('Error al procesar PDF: ' + (postErr.response?.data?.message || postErr.message), { id: 'upload-pdf' });
+        } finally {
+          setSyncingCatalog(false);
+        }
+      };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      toast.error('Error al leer el archivo PDF');
+      setSyncingCatalog(false);
+    }
+  };
+
   const handleImportCatalogSubmit = async (e) => {
     e.preventDefault();
     if (!catalogModal.rawJson.trim()) {
@@ -1518,7 +1576,7 @@ export default function Admin() {
                   <button
                     onClick={handleSyncCatalogDefaults}
                     disabled={syncingCatalog}
-                    className="flex items-center gap-2 px-5 py-3 rounded-xl font-bold bg-white text-zinc-900 hover:bg-zinc-100 transition shadow-lg hover:shadow-xl disabled:opacity-50"
+                    className="flex items-center gap-2 px-5 py-3 rounded-xl font-bold bg-white text-zinc-900 hover:bg-zinc-100 transition shadow-lg hover:shadow-xl disabled:opacity-50 cursor-pointer"
                   >
                     <RefreshCw size={18} className={syncingCatalog ? 'animate-spin' : ''} />
                     <span>Sincronizar Libro Oficial</span>
@@ -1526,15 +1584,25 @@ export default function Admin() {
 
                   <button
                     onClick={() => setCatalogModal({ isOpen: true, edition: 'UNICA Edición Nº 51', rawJson: '', fileLoading: false })}
-                    className="flex items-center gap-2 px-5 py-3 rounded-xl font-bold bg-rose-600 hover:bg-rose-500 text-white transition shadow-lg shadow-rose-900/50"
+                    className="flex items-center gap-2 px-5 py-3 rounded-xl font-bold bg-rose-600 hover:bg-rose-500 text-white transition shadow-lg shadow-rose-900/50 cursor-pointer"
                   >
                     <Upload size={18} />
-                    <span>Cargar Nueva Edición</span>
+                    <span>Subir Libro (PDF)</span>
+                  </button>
+
+                  <button
+                    onClick={handleClearCatalog}
+                    disabled={syncingCatalog}
+                    className="flex items-center gap-2 px-5 py-3 rounded-xl font-bold bg-red-950/60 hover:bg-red-900/80 text-red-200 border border-red-700/60 transition shadow-lg disabled:opacity-50 cursor-pointer"
+                    title="Vaciar catálogo completo antes de cargar un nuevo libro"
+                  >
+                    <Trash2 size={18} className="text-red-400" />
+                    <span>Vaciar Catálogo</span>
                   </button>
 
                   <button
                     onClick={handleExportCatalog}
-                    className="flex items-center gap-2 px-4 py-3 rounded-xl font-medium bg-zinc-800/80 hover:bg-zinc-700 text-zinc-200 transition border border-zinc-700"
+                    className="flex items-center gap-2 px-4 py-3 rounded-xl font-medium bg-zinc-800/80 hover:bg-zinc-700 text-zinc-200 transition border border-zinc-700 cursor-pointer"
                     title="Exportar respaldo JSON"
                   >
                     <Download size={18} />
@@ -1828,7 +1896,7 @@ export default function Admin() {
               </button>
             </div>
 
-            <form onSubmit={handleImportCatalogSubmit} className="p-6 space-y-5">
+            <div className="p-6 space-y-6">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-zinc-600 mb-1.5">Nombre de la Edición</label>
                 <input
@@ -1836,54 +1904,84 @@ export default function Admin() {
                   value={catalogModal.edition}
                   onChange={(e) => setCatalogModal(prev => ({ ...prev, edition: e.target.value }))}
                   placeholder="Ej: UNICA Perfumería - Edición Nº 51"
-                  required
                   className="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-sm focus:ring-2 focus:ring-rose-500 outline-none"
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-600 mb-1.5">Cargar Archivo de Catálogo (.json)</label>
-                <div className="border-2 border-dashed border-zinc-200 hover:border-rose-400 rounded-2xl p-4 text-center cursor-pointer transition bg-zinc-50 hover:bg-rose-50/20 relative">
-                  <input
-                    type="file"
-                    accept=".json"
-                    onChange={handleFileUploadCatalog}
-                    className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                  />
-                  <Upload size={24} className="mx-auto text-zinc-400 mb-1" />
-                  <p className="text-xs font-semibold text-zinc-700">Arrastra tu archivo JSON o haz clic para seleccionarlo</p>
-                  <p className="text-[11px] text-zinc-400 mt-0.5">Formato estándar compatible con exportaciones del sistema</p>
+              {/* OPCION 1: SUBIR LIBRO EN PDF */}
+              <div className="bg-rose-50/60 border-2 border-dashed border-rose-300 hover:border-rose-500 rounded-2xl p-6 text-center transition relative">
+                <input
+                  type="file"
+                  accept=".pdf"
+                  onChange={handlePdfUpload}
+                  disabled={syncingCatalog}
+                  className="absolute inset-0 opacity-0 cursor-pointer w-full h-full disabled:cursor-not-allowed"
+                />
+                <div className="w-12 h-12 bg-rose-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-md shadow-rose-900/20">
+                  <FileText size={24} />
+                </div>
+                <h4 className="font-bold text-zinc-900 text-base">Subir Libro en PDF (.pdf)</h4>
+                <p className="text-xs text-zinc-600 mt-1 max-w-sm mx-auto">
+                  Arrastra o selecciona el archivo PDF del nuevo catálogo (ej. <em>UNICA51.pdf</em>). El sistema lo procesará y sincronizará los productos automáticamente.
+                </p>
+                <span className="inline-block mt-3 px-4 py-1.5 bg-rose-600 text-white text-xs font-bold rounded-lg shadow-sm">
+                  {syncingCatalog ? 'Procesando PDF...' : 'Seleccionar PDF del Libro'}
+                </span>
+              </div>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-zinc-200"></div>
+                </div>
+                <div className="relative flex justify-center text-xs">
+                  <span className="px-3 bg-white text-zinc-400 font-bold uppercase tracking-wider">O importar datos JSON</span>
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-600 mb-1.5">O pega los datos JSON directamente</label>
-                <textarea
-                  value={catalogModal.rawJson}
-                  onChange={(e) => setCatalogModal(prev => ({ ...prev, rawJson: e.target.value }))}
-                  rows={6}
-                  placeholder={`{\n  "edition": "UNICA Edición Nº 51",\n  "products": [\n    {\n      "name": "Perfume Estilo Nuevo...",\n      "price": 24999,\n      "promotional_price": 19999,\n      "sku": "NEW-001"\n    }\n  ]\n}`}
-                  className="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl font-mono text-xs focus:ring-2 focus:ring-rose-500 outline-none resize-none"
-                />
-              </div>
+              <form onSubmit={handleImportCatalogSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-600 mb-1.5">Cargar Archivo JSON (.json)</label>
+                  <div className="border border-zinc-200 hover:border-zinc-300 rounded-xl p-3 text-center cursor-pointer transition bg-zinc-50 relative">
+                    <input
+                      type="file"
+                      accept=".json"
+                      onChange={handleFileUploadCatalog}
+                      className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                    />
+                    <Upload size={18} className="mx-auto text-zinc-400 mb-1" />
+                    <p className="text-xs font-semibold text-zinc-700">Seleccionar archivo JSON de productos</p>
+                  </div>
+                </div>
 
-              <div className="pt-2 flex justify-end gap-3 border-t border-zinc-100">
-                <button
-                  type="button"
-                  onClick={() => setCatalogModal({ isOpen: false, edition: '', rawJson: '', fileLoading: false })}
-                  className="px-5 py-2.5 font-bold text-zinc-600 bg-zinc-100 hover:bg-zinc-200 rounded-xl transition-colors text-sm"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={syncingCatalog}
-                  className="px-6 py-2.5 font-bold text-white bg-rose-600 hover:bg-rose-500 rounded-xl transition-colors shadow-lg shadow-rose-900/20 text-sm disabled:opacity-50"
-                >
-                  {syncingCatalog ? 'Importando...' : 'Guardar y Actualizar Catálogo'}
-                </button>
-              </div>
-            </form>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-600 mb-1.5">O pegar JSON directamente</label>
+                  <textarea
+                    value={catalogModal.rawJson}
+                    onChange={(e) => setCatalogModal(prev => ({ ...prev, rawJson: e.target.value }))}
+                    rows={4}
+                    placeholder={`{\n  "edition": "UNICA Edición Nº 51",\n  "products": [\n    { "name": "Perfume...", "price": 24999 }\n  ]\n}`}
+                    className="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl font-mono text-xs focus:ring-2 focus:ring-rose-500 outline-none resize-none"
+                  />
+                </div>
+
+                <div className="pt-2 flex justify-end gap-3 border-t border-zinc-100">
+                  <button
+                    type="button"
+                    onClick={() => setCatalogModal({ isOpen: false, edition: '', rawJson: '', fileLoading: false })}
+                    className="px-5 py-2.5 font-bold text-zinc-600 bg-zinc-100 hover:bg-zinc-200 rounded-xl transition-colors text-sm cursor-pointer"
+                  >
+                    Cerrar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={syncingCatalog || !catalogModal.rawJson.trim()}
+                    className="px-6 py-2.5 font-bold text-white bg-zinc-800 hover:bg-zinc-700 rounded-xl transition-colors text-sm disabled:opacity-50 cursor-pointer"
+                  >
+                    {syncingCatalog ? 'Importando...' : 'Importar JSON'}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}

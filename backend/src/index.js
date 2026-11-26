@@ -46,13 +46,17 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Serve static uploads and catalog
 app.use('/uploads', express.static(uploadsDir));
-const publicCatalogDir = path.join(process.cwd(), 'public/catalog');
-if (fs.existsSync(publicCatalogDir)) {
-  app.use('/catalog', express.static(publicCatalogDir));
-}
-const parentCatalogDir = path.join(process.cwd(), '../frontend/public/catalog');
-if (fs.existsSync(parentCatalogDir)) {
-  app.use('/catalog', express.static(parentCatalogDir));
+const possibleCatalogDirs = [
+  path.join(process.cwd(), 'frontend/public/catalog'),
+  path.join(process.cwd(), 'public/catalog'),
+  path.join(process.cwd(), '../frontend/public/catalog'),
+  path.join(process.cwd(), 'backend/public/catalog')
+];
+for (const catDir of possibleCatalogDirs) {
+  if (fs.existsSync(catDir)) {
+    app.use('/catalog', express.static(catDir));
+    break;
+  }
 }
 
 // Rutas base

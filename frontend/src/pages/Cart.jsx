@@ -229,8 +229,8 @@ export default function Cart() {
                   <span className="font-medium text-slate-800">${subtotal.toLocaleString('es-AR')}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-600">Envíos</span>
-                  <span className="text-green-600 font-medium">Gratis</span>
+                  <span className="text-slate-600">Envío</span>
+                  <span className="text-zinc-600 font-medium">A coordinar</span>
                 </div>
                 {appliedCoupon && (
                   <div className="flex justify-between text-emerald-600 font-bold">
