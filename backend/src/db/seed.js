@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { eq } from 'drizzle-orm';
 import { db } from './index.js';
 import { users, categories, products, banners, loyaltySettings } from './schema.js';
 import { hashPassword } from '../utils/auth.js';
@@ -63,6 +64,7 @@ export async function runSeed() {
     const existingProducts = await db.select().from(products).all();
     const existingSkuMap = new Set(existingProducts.map(p => p.sku));
 
+    const toInsert = [];
     for (const prod of catalog.products) {
       if (existingSkuMap.has(prod.sku)) {
         continue;
@@ -70,7 +72,7 @@ export async function runSeed() {
 
       const catId = categoryMap.get(prod.category_slug) || Array.from(categoryMap.values())[0];
 
-      await db.insert(products).values({
+      toInsert.push({
         id: crypto.randomUUID(),
         name: prod.name,
         slug: prod.slug + '-' + prod.sku.toLowerCase(),
@@ -87,10 +89,17 @@ export async function runSeed() {
         active: true,
         createdAt: new Date(),
         updatedAt: new Date(),
-      }).onConflictDoNothing();
+      });
 
       existingSkuMap.add(prod.sku);
-      insertedCount++;
+    }
+
+    // Insertar en chunks optimizados
+    const chunkSize = 25;
+    for (let i = 0; i < toInsert.length; i += chunkSize) {
+      const chunk = toInsert.slice(i, i + chunkSize);
+      await db.insert(products).values(chunk).onConflictDoNothing();
+      insertedCount += chunk.length;
     }
     console.log(`✅ ${insertedCount} Productos insertados del catálogo (${catalog.products.length} totales en catálogo)`);
 

@@ -199,7 +199,7 @@ export default function Admin() {
     try {
       setSyncingCatalog(true);
       toast.loading('Vaciando catálogo...', { id: 'clear-cat' });
-      const res = await api.post('/admin/catalog/clear');
+      const res = await api.post('/admin/catalog/clear', { clearCategories: false });
       if (res.data.success) {
         toast.success(res.data.message || 'Catálogo limpiado con éxito', { id: 'clear-cat' });
         fetchData();

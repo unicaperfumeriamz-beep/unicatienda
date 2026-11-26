@@ -691,26 +691,29 @@ router.post('/catalog/import', authenticate, requireRole('ADMIN'), async (req, r
 // POST /api/admin/catalog/clear (Vaciar catálogo completo a cero)
 router.post('/catalog/clear', authenticate, requireRole('ADMIN'), async (req, res) => {
   try {
-    await db.delete(cartItems);
-    await db.delete(orderItems);
-    await db.delete(productComments);
+    try { await db.delete(cartItems); } catch (_) {}
+    try { await db.delete(orderItems); } catch (_) {}
+    try { await db.delete(productComments); } catch (_) {}
     await db.delete(products);
 
-    if (req.body.clearCategories) {
-      await db.delete(categories);
+    if (req.body?.clearCategories) {
+      try { await db.delete(categories); } catch (_) {}
     }
 
-    res.json({ success: true, message: 'Catálogo limpiado exitosamente. La tienda quedó en cero productos lista para el nuevo libro.' });
+    res.json({ 
+      success: true, 
+      message: 'Catálogo limpiado exitosamente. La tienda quedó en cero productos lista para el nuevo libro.' 
+    });
   } catch (err) {
     console.error('Error limpiando catálogo:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: 'Error limpiando catálogo: ' + (err.message || err) });
   }
 });
 
 // POST /api/admin/catalog/upload-pdf (Cargar PDF del libro directamente)
 router.post('/catalog/upload-pdf', authenticate, requireRole('ADMIN'), async (req, res) => {
   try {
-    const { pdfBase64, filename, edition } = req.body;
+    const { pdfBase64, filename, edition } = req.body || {};
     if (!pdfBase64) {
       return res.status(400).json({ success: false, message: 'No se envió ningún archivo PDF' });
     }
@@ -718,12 +721,16 @@ router.post('/catalog/upload-pdf', authenticate, requireRole('ADMIN'), async (re
     const cleanBase64 = pdfBase64.replace(/^data:application\/pdf;base64,/, '');
     const buffer = Buffer.from(cleanBase64, 'base64');
     
-    const catalogUploadDir = path.join(process.cwd(), 'uploads/catalog');
-    await fs.promises.mkdir(catalogUploadDir, { recursive: true });
+    const catalogUploadDir = fs.existsSync(path.join(process.cwd(), 'backend'))
+      ? path.join(process.cwd(), 'backend/uploads/catalog')
+      : path.join(process.cwd(), 'uploads/catalog');
+    if (!fs.existsSync(catalogUploadDir)) {
+      fs.mkdirSync(catalogUploadDir, { recursive: true });
+    }
 
     const safeName = filename ? filename.replace(/[^a-zA-Z0-9._-]/g, '_') : `libro_${Date.now()}.pdf`;
     const pdfPath = path.join(catalogUploadDir, safeName);
-    await fs.promises.writeFile(pdfPath, buffer);
+    fs.writeFileSync(pdfPath, buffer);
     console.log(`📘 Libro PDF guardado en: ${pdfPath} (${(buffer.length / 1024 / 1024).toFixed(2)} MB)`);
 
     // Sincronizar catálogo oficial
@@ -740,7 +747,7 @@ router.post('/catalog/upload-pdf', authenticate, requireRole('ADMIN'), async (re
     });
   } catch (err) {
     console.error('Error procesando PDF del catálogo:', err);
-    res.status(500).json({ success: false, message: 'Error procesando PDF: ' + err.message });
+    res.status(500).json({ success: false, message: 'Error procesando PDF: ' + (err.message || err) });
   }
 });
 
