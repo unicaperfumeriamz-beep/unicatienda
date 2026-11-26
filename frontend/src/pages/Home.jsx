@@ -46,6 +46,15 @@ export default function Home() {
     if (urlOfertas) setSortBy('promo');
   }, [urlSearch, urlCategory, urlOfertas]);
 
+  useEffect(() => {
+    if (window.location.hash === '#catalogo') {
+      setTimeout(() => {
+        const el = document.getElementById('catalogo');
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }, 300);
+    }
+  }, [loading]);
+
   const toggleViewMode = (mode) => {
     setViewMode(mode);
     localStorage.setItem('preferred_view_mode', mode);
@@ -91,6 +100,43 @@ export default function Home() {
     }, 3000);
   };
 
+  const handleBannerClick = (banner) => {
+    if (!banner) return;
+    const link = banner.buttonLink || '';
+    
+    // Si apunta directamente a un producto existente
+    if (link && link.startsWith('/product/')) {
+      navigate(link);
+      return;
+    }
+
+    // Si el banner corresponde al lanzamiento de Born in Roma
+    if (banner.title?.toLowerCase().includes('roma') || banner.buttonText?.toLowerCase().includes('lanzamiento')) {
+      const prod = products.find(p => p.sku === 'MBRUPP' || p.name.toLowerCase().includes('born in roma'));
+      if (prod) {
+        navigate(`/product/${prod.id}`);
+        return;
+      }
+    }
+
+    // Si el banner corresponde a la línea Árabe / Torino
+    if (banner.title?.toLowerCase().includes('torino') || banner.buttonText?.toLowerCase().includes('árabe') || banner.buttonText?.toLowerCase().includes('arabe')) {
+      const prod = products.find(p => p.sku === 'UT024' || p.name.toLowerCase().includes('torino'));
+      if (prod) {
+        navigate(`/product/${prod.id}`);
+        return;
+      }
+    }
+
+    // Si es enlace al catálogo o no tiene producto, hacer scroll suave a la grilla
+    const el = document.getElementById('catalogo');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      navigate('/#catalogo');
+    }
+  };
+
   // Filtrado y ordenamiento de productos
   const filteredProducts = products.filter(product => {
     const matchesCategory = selectedCategory === 'all' || product.categoryId === selectedCategory;
@@ -134,14 +180,21 @@ export default function Home() {
               {banners[0].subtitle && <p className="text-lg text-rose-100 max-w-lg leading-relaxed">{banners[0].subtitle}</p>}
               {banners[0].buttonText && (
                 <div>
-                  <button onClick={() => navigate(banners[0].buttonLink || '/')} className="bg-amber-400 text-slate-900 px-8 py-3.5 rounded-2xl font-black hover:bg-amber-300 transition-all shadow-xl hover:shadow-amber-400/30 transform hover:-translate-y-0.5">
+                  <button 
+                    onClick={() => handleBannerClick(banners[0])} 
+                    className="bg-amber-400 text-slate-900 px-8 py-3.5 rounded-2xl font-black hover:bg-amber-300 transition-all shadow-xl hover:shadow-amber-400/30 transform hover:-translate-y-0.5 cursor-pointer"
+                  >
                     {banners[0].buttonText}
                   </button>
                 </div>
               )}
             </div>
             <div className="w-full md:w-1/2 flex justify-center md:justify-end">
-              <div className="w-full max-w-md h-80 bg-white/10 backdrop-blur-md rounded-3xl border border-white/20 shadow-2xl flex items-center justify-center overflow-hidden p-2">
+              <div 
+                onClick={() => handleBannerClick(banners[0])} 
+                className="w-full max-w-md h-80 bg-white/10 backdrop-blur-md rounded-3xl border border-white/20 shadow-2xl flex items-center justify-center overflow-hidden p-2 cursor-pointer hover:scale-105 transition-transform"
+                title={banners[0].title}
+              >
                 {banners[0].imageUrl ? (
                   <img src={banners[0].imageUrl} alt={banners[0].title} className="w-full h-full object-contain rounded-2xl" />
                 ) : (

@@ -10,7 +10,7 @@ if (fs.existsSync(path.join(process.cwd(), 'backend/.env'))) {
   dotenv.config({ path: path.join(process.cwd(), 'backend/.env') });
 }
 
-const client = createClient({
+export const client = createClient({
   url: process.env.DATABASE_URL || 'file:local.db',
   authToken: process.env.TURSO_AUTH_TOKEN,
 });
