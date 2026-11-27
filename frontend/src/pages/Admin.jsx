@@ -476,7 +476,7 @@ export default function Admin() {
         <div className="border-t border-zinc-800 p-3 space-y-2 shrink-0 bg-zinc-900">
           <button onClick={() => navigate('/')} className="w-full flex items-center gap-4 px-3 py-3 rounded-lg font-medium text-rose-400 hover:bg-zinc-800 hover:text-rose-300 transition-colors">
             <div className="min-w-[1.5rem] flex justify-center"><ArrowLeft size={24} /></div>
-            <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 tracking-wide">Volver a ÚNICA</span>
+            <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 tracking-wide">Volver a UNICA</span>
           </button>
           
           <button onClick={() => { logout(); navigate('/'); }} className="w-full flex items-center gap-4 px-3 py-3 rounded-lg font-medium text-red-400 hover:bg-zinc-800 hover:text-red-300 transition-colors">
@@ -557,7 +557,7 @@ export default function Admin() {
 
               <div className="border-t border-zinc-800 p-3 space-y-2 shrink-0 bg-zinc-900">
                 <button onClick={() => { navigate('/'); setMobileMenuOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm text-rose-400 hover:bg-zinc-800">
-                  <ArrowLeft size={18} /> <span>Volver a ÚNICA</span>
+                  <ArrowLeft size={18} /> <span>Volver a UNICA</span>
                 </button>
                 <button onClick={() => { logout(); navigate('/'); }} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm text-red-400 hover:bg-zinc-800">
                   <LogOut size={18} /> <span>Cerrar Sesión</span>
@@ -1491,7 +1491,7 @@ export default function Admin() {
                         </div>
                       </td>
                       <td className="p-4 text-center">
-                        <a href={`mailto:${u.email}?subject=Novedades de ÚNICA Perfumería&body=Hola ${u.name}, tenemos novedades exclusivas para ti en ÚNICA Perfumería...`} className="px-3 py-1 bg-rose-100 text-rose-700 rounded-lg text-xs font-bold hover:bg-rose-200 transition">Contactar</a>
+                        <a href={`mailto:${u.email}?subject=Novedades de UNICA Perfumería&body=Hola ${u.name}, tenemos novedades exclusivas para ti en UNICA Perfumería...`} className="px-3 py-1 bg-rose-100 text-rose-700 rounded-lg text-xs font-bold hover:bg-rose-200 transition">Contactar</a>
                       </td>
                     </tr>
                   ))}

@@ -138,7 +138,7 @@ app.listen(port, async () => {
     const { products } = await import('./db/schema.js');
     const existing = await db.select().from(products).limit(1);
     if (!existing || existing.length === 0) {
-      console.log('📦 Base de datos vacía detectada. Ejecutando seed automático de ÚNICA Perfumería...');
+      console.log('📦 Base de datos vacía detectada. Ejecutando seed automático de UNICA Perfumería...');
       const { runSeed } = await import('./db/seed.js');
       await runSeed();
     }

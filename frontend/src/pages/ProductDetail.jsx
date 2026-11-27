@@ -135,41 +135,41 @@ export default function ProductDetail() {
           {/* Panel de Compra */}
           <div className="w-full md:w-[40%] p-8 flex flex-col">
             <div className="flex items-center justify-between text-sm text-zinc-500 mb-2">
-              <span>Original UNICA • Edición 50</span>
+              <span className="font-serif tracking-wider font-semibold text-fuchsia-900">Original UNICA • Edición 50</span>
               {product.sku && (
-                <span className="font-mono text-xs bg-zinc-100 px-2 py-0.5 rounded font-bold text-zinc-700">
+                <span className="font-mono text-xs bg-fuchsia-50 text-fuchsia-900 border border-fuchsia-200/60 px-2 py-0.5 rounded font-bold">
                   CÓD: {product.sku}
                 </span>
               )}
             </div>
-            <h1 className="text-2xl md:text-3xl font-bold text-zinc-900 mb-4">{product.name}</h1>
+            <h1 className="text-2xl md:text-3xl font-black font-serif text-zinc-900 mb-4">{product.name}</h1>
             
             <div className="mb-6">
               {product.promotionalPrice && product.promotionalPrice < product.price ? (
                 <div>
-                  <span className="text-4xl font-black text-rose-600">${Number(product.promotionalPrice).toLocaleString('es-AR')}</span>
+                  <span className="text-4xl font-black text-fuchsia-950 font-serif">${Number(product.promotionalPrice).toLocaleString('es-AR')}</span>
                   <div className="flex items-center gap-2 mt-1">
                     <span className="text-base text-zinc-400 line-through font-semibold">${Number(product.price).toLocaleString('es-AR')}</span>
-                    <span className="text-xs bg-rose-100 text-rose-700 font-black px-2 py-0.5 rounded-full">
+                    <span className="text-xs bg-fuchsia-100 text-fuchsia-800 font-black px-2.5 py-0.5 rounded-full">
                       ¡Precio Promocional!
                     </span>
                   </div>
                 </div>
               ) : (
-                <span className="text-4xl font-light text-zinc-900">${Number(product.price).toLocaleString('es-AR')}</span>
+                <span className="text-4xl font-black text-zinc-900 font-serif">${Number(product.price).toLocaleString('es-AR')}</span>
               )}
               
               <span className="text-sm font-medium text-emerald-600 block mt-2">en hasta 12x sin interés con Mercado Pago</span>
               {product.points > 0 && (
-                <div className="mt-2 bg-emerald-50 border border-emerald-100 px-3 py-1.5 rounded-lg inline-flex items-center gap-2">
-                  <Gift size={16} className="text-emerald-500" />
-                  <span className="text-sm font-bold text-emerald-700">Sumas {product.points} puntos de beneficio</span>
+                <div className="mt-2 bg-amber-50/80 border border-amber-200 px-3 py-1.5 rounded-lg inline-flex items-center gap-2">
+                  <Gift size={16} className="text-amber-500" />
+                  <span className="text-sm font-bold text-amber-800">Sumas {product.points} puntos UNICA</span>
                 </div>
               )}
             </div>
 
             <div className="flex items-center gap-3 text-zinc-700 text-sm font-semibold mb-1">
-              <Truck size={20} className="text-rose-500" /> Envíos a todo el país
+              <Truck size={20} className="text-fuchsia-600" /> Envíos a todo el país
             </div>
             <div className="text-zinc-500 text-xs mb-8">Coordinamos el envío directamente a tu domicilio o sucursal</div>
 
@@ -178,9 +178,9 @@ export default function ProductDetail() {
                 <div className="font-semibold text-zinc-900">Cantidad:</div>
                 <div className="flex items-center gap-4">
                   <div className="flex items-center border border-zinc-300 rounded-lg overflow-hidden bg-zinc-50">
-                    <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="px-4 py-2 hover:bg-zinc-200 transition-colors font-bold text-blue-600">-</button>
+                    <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="px-4 py-2 hover:bg-zinc-200 transition-colors font-bold text-fuchsia-800 cursor-pointer">-</button>
                     <span className="px-4 py-2 font-bold bg-white min-w-[3rem] text-center">{quantity}</span>
-                    <button onClick={() => setQuantity(q => Math.min(product.stock, q + 1))} className="px-4 py-2 hover:bg-zinc-200 transition-colors font-bold text-blue-600">+</button>
+                    <button onClick={() => setQuantity(q => Math.min(product.stock, q + 1))} className="px-4 py-2 hover:bg-zinc-200 transition-colors font-bold text-fuchsia-800 cursor-pointer">+</button>
                   </div>
                   <span className="text-sm text-zinc-500">({product.stock} disponibles)</span>
                 </div>
@@ -193,15 +193,16 @@ export default function ProductDetail() {
 
             <div className="mt-auto space-y-3">
               <button 
+                onClick={async () => { await handleAddToCart(); navigate('/checkout'); }}
                 disabled={product.stock === 0}
-                className="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition-colors disabled:bg-zinc-300 shadow-lg shadow-blue-600/20"
+                className="w-full bg-[#1b0026] text-white font-bold py-4 rounded-xl hover:bg-fuchsia-800 transition-colors disabled:bg-zinc-300 shadow-lg shadow-fuchsia-950/20 cursor-pointer"
               >
                 Comprar ahora
               </button>
               <button 
                 onClick={handleAddToCart}
                 disabled={product.stock === 0}
-                className="w-full bg-blue-100 text-blue-600 font-bold py-4 rounded-xl hover:bg-blue-200 transition-colors disabled:bg-zinc-100 disabled:text-zinc-400"
+                className="w-full bg-fuchsia-50 text-fuchsia-900 border border-fuchsia-200 font-bold py-4 rounded-xl hover:bg-fuchsia-100 transition-colors disabled:bg-zinc-100 disabled:text-zinc-400 cursor-pointer"
               >
                 Agregar al carrito
               </button>

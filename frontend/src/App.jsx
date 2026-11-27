@@ -13,6 +13,7 @@ import ProductDetail from './pages/ProductDetail'
 import Profile from './pages/Profile'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
+import FloatingWhatsApp from './components/FloatingWhatsApp'
 import { useAuth } from './contexts/AuthContext'
 
 function App() {
@@ -49,6 +50,7 @@ function App() {
         </main>
 
         {!isAdminRoute && <Footer />}
+        <FloatingWhatsApp />
       </div>
   )
 }

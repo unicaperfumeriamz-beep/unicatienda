@@ -102,7 +102,7 @@ export default function Referrals() {
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-indigo-400">ilimitadas</span>
           </h1>
           <p className="mt-4 text-xl text-zinc-400 max-w-2xl mx-auto mb-10">
-            Invita a tus amigos a unirse a ÚNICA Perfumería. Ellos obtienen las mejores fragancias exclusivas y tú acumulas puntos para canjear por productos reales.
+            Invita a tus amigos a unirse a UNICA Perfumería. Ellos obtienen las mejores fragancias exclusivas y tú acumulas puntos para canjear por productos reales.
           </p>
 
           <div className="max-w-2xl mx-auto bg-white/10 backdrop-blur-xl border border-white/20 p-2 pl-6 rounded-full flex items-center justify-between shadow-2xl transition-all hover:bg-white/15">

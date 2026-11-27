@@ -12,7 +12,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export async function runSeed() {
-  console.log('🌸 Iniciando Seed para ÚNICA Perfumería...');
+  console.log('🌸 Iniciando Seed para UNICA Perfumería...');
 
   try {
     // 1. Usuario Administrador Único
@@ -20,7 +20,7 @@ export async function runSeed() {
     await db.delete(users).where(eq(users.role, 'ADMIN'));
     await db.insert(users).values({
       id: crypto.randomUUID(),
-      name: 'ÚNICA Perfumería',
+      name: 'UNICA Perfumería',
       email: 'unica.perfumeria.mz@gmail.com',
       passwordHash: adminPass,
       role: 'ADMIN',
@@ -103,13 +103,13 @@ export async function runSeed() {
     }
     console.log(`✅ ${insertedCount} Productos insertados del catálogo (${catalog.products.length} totales en catálogo)`);
 
-    // 5. Banners para la tienda ÚNICA Perfumería
+    // 5. Banners para la tienda UNICA Perfumería
     const existingBanners = await db.select().from(banners).all();
     if (existingBanners.length === 0) {
       await db.insert(banners).values([
         {
           id: crypto.randomUUID(),
-          title: "Lanzamiento Única Premium: Estilo Born in Roma",
+          title: "Lanzamiento Unica Premium: Estilo Born in Roma",
           subtitle: "Descubrí la nueva creación con neceser y perfumero de regalo. Edición Nº 50.",
           buttonText: "Ver Lanzamiento",
           buttonLink: "/product/f56740b9-ff83-44e8-ae84-b35043d0bc58",
@@ -154,7 +154,7 @@ export async function runSeed() {
       console.log('✅ Configuración de fidelidad y puntos inicializada');
     }
 
-    console.log('✨ Seed de ÚNICA Perfumería finalizado con éxito total.');
+    console.log('✨ Seed de UNICA Perfumería finalizado con éxito total.');
   } catch (error) {
     console.error('❌ Error en seed:', error);
     throw error;

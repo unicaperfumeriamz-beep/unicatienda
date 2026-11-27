@@ -170,19 +170,23 @@ export default function Home() {
 
       {/* Hero Banner Principal */}
       {banners.length > 0 ? (
-        <div className="w-full bg-gradient-to-r from-zinc-950 via-rose-950 to-zinc-900 text-white py-16 px-4 sm:px-6 lg:px-8 shadow-inner border-b border-rose-900/40">
-          <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
+        <div className="w-full bg-gradient-to-r from-[#170020] via-[#330045] to-[#170020] text-white py-16 px-4 sm:px-6 lg:px-8 shadow-inner border-b border-fuchsia-900/50 relative overflow-hidden">
+          {/* Subtle neon glowing backdrops matching the flyer */}
+          <div className="absolute top-0 right-1/4 w-96 h-96 bg-fuchsia-600/15 rounded-full blur-3xl pointer-events-none"></div>
+          <div className="absolute bottom-0 left-10 w-80 h-80 bg-purple-600/15 rounded-full blur-3xl pointer-events-none"></div>
+
+          <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
             <div className="md:w-1/2 space-y-5 text-center md:text-left">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-400/20 text-amber-300 font-bold text-xs uppercase tracking-wider backdrop-blur-xs border border-amber-400/30">
-                <Sparkles size={14} /> UNICA Perfumería • Edición Nº 50
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-fuchsia-500/20 to-purple-500/20 text-fuchsia-300 font-bold text-xs uppercase tracking-wider backdrop-blur-xs border border-fuchsia-500/30">
+                <Sparkles size={14} className="text-amber-400" /> UNICA Perfumería • Edición Nº 50
               </span>
-              <h1 className="text-4xl md:text-6xl font-black leading-tight tracking-tight">{banners[0].title}</h1>
-              {banners[0].subtitle && <p className="text-lg text-rose-100 max-w-lg leading-relaxed">{banners[0].subtitle}</p>}
+              <h1 className="text-4xl md:text-6xl font-black font-serif leading-tight tracking-tight text-white">{banners[0].title}</h1>
+              {banners[0].subtitle && <p className="text-lg text-fuchsia-100/90 max-w-lg leading-relaxed font-sans">{banners[0].subtitle}</p>}
               {banners[0].buttonText && (
                 <div>
                   <button 
                     onClick={() => handleBannerClick(banners[0])} 
-                    className="bg-amber-400 text-slate-900 px-8 py-3.5 rounded-2xl font-black hover:bg-amber-300 transition-all shadow-xl hover:shadow-amber-400/30 transform hover:-translate-y-0.5 cursor-pointer"
+                    className="bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 px-8 py-3.5 rounded-2xl font-black transition-all shadow-xl shadow-amber-500/20 transform hover:-translate-y-0.5 cursor-pointer font-sans"
                   >
                     {banners[0].buttonText}
                   </button>
@@ -192,7 +196,7 @@ export default function Home() {
             <div className="w-full md:w-1/2 flex justify-center md:justify-end">
               <div 
                 onClick={() => handleBannerClick(banners[0])} 
-                className="w-full max-w-md h-80 bg-white/10 backdrop-blur-md rounded-3xl border border-white/20 shadow-2xl flex items-center justify-center overflow-hidden p-2 cursor-pointer hover:scale-105 transition-transform"
+                className="w-full max-w-md h-80 bg-white/10 backdrop-blur-md rounded-3xl border border-fuchsia-500/30 shadow-2xl flex items-center justify-center overflow-hidden p-2 cursor-pointer hover:scale-105 transition-transform"
                 title={banners[0].title}
               >
                 {banners[0].imageUrl ? (
@@ -205,20 +209,20 @@ export default function Home() {
           </div>
         </div>
       ) : (
-        <div className="w-full bg-gradient-to-r from-zinc-950 via-rose-950 to-zinc-900 text-white py-14 px-4 sm:px-6 lg:px-8 shadow-md border-b border-rose-900/40">
+        <div className="w-full bg-gradient-to-r from-[#170020] via-[#330045] to-[#170020] text-white py-14 px-4 sm:px-6 lg:px-8 shadow-md border-b border-fuchsia-900/50">
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="md:w-1/2 space-y-4 text-center md:text-left">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/20 text-rose-200 font-bold text-xs uppercase tracking-wider backdrop-blur-xs border border-rose-500/30">
-                <Sparkles size={14} /> Catálogo Oficial UNICA
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-fuchsia-500/20 text-fuchsia-300 font-bold text-xs uppercase tracking-wider backdrop-blur-xs border border-fuchsia-500/30">
+                <Sparkles size={14} className="text-amber-400" /> Catálogo Oficial UNICA
               </span>
-              <h1 className="text-4xl md:text-5xl font-black tracking-tight">Esencialmente Bueno, <br/><span className="text-amber-400">Fragancias Únicas</span></h1>
-              <p className="text-rose-100 max-w-lg text-base">Descubrí las colecciones Premium, Árabe, Difusores y Aromaterapia Sumeria de la Edición Nº 50.</p>
+              <h1 className="text-4xl md:text-5xl font-black font-serif tracking-tight">Esencialmente Bueno, <br/><span className="text-amber-400">Fragancias Exclusivas</span></h1>
+              <p className="text-fuchsia-100/90 max-w-lg text-base">Descubrí las colecciones Premium, Árabe, Difusores y Aromaterapia Sumeria de la Edición Nº 50.</p>
             </div>
             <div className="flex justify-center">
-              <div className="bg-white/10 border border-white/20 backdrop-blur-md p-6 rounded-3xl text-center shadow-xl">
+              <div className="bg-white/10 border border-fuchsia-500/30 backdrop-blur-md p-6 rounded-3xl text-center shadow-xl">
                 <Gift className="w-12 h-12 text-amber-300 mx-auto mb-2" />
-                <p className="font-bold text-lg">Puntos ÚNICA</p>
-                <p className="text-xs text-rose-200 mt-1">¡Suma 10% en puntos con cada compra!</p>
+                <p className="font-bold text-lg font-serif">Puntos UNICA</p>
+                <p className="text-xs text-fuchsia-200 mt-1">¡Suma 10% en puntos con cada compra!</p>
               </div>
             </div>
           </div>
@@ -249,7 +253,7 @@ export default function Home() {
                 onClick={() => setSelectedCategory('all')}
                 className={`px-4 py-2 rounded-xl font-bold text-xs transition-all whitespace-nowrap cursor-pointer ${
                   selectedCategory === 'all'
-                    ? 'bg-slate-900 text-white shadow-md'
+                    ? 'bg-[#250133] text-white shadow-md shadow-fuchsia-950/20'
                     : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
                 }`}
               >
@@ -263,12 +267,12 @@ export default function Home() {
                     onClick={() => setSelectedCategory(cat.id)}
                     className={`px-4 py-2 rounded-xl font-bold text-xs transition-all whitespace-nowrap flex items-center gap-2 cursor-pointer ${
                       selectedCategory === cat.id
-                        ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+                        ? 'bg-[#3b0052] text-white shadow-md shadow-fuchsia-900/30'
                         : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
                     }`}
                   >
                     <span>{cat.name}</span>
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${selectedCategory === cat.id ? 'bg-blue-700 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${selectedCategory === cat.id ? 'bg-fuchsia-900 text-fuchsia-200' : 'bg-slate-100 text-slate-500'}`}>
                       {count}
                     </span>
                   </button>
@@ -405,7 +409,7 @@ export default function Home() {
               return (
                 <div 
                   key={product.id} 
-                  className="bg-white rounded-2xl shadow-xs border border-slate-200 hover:shadow-xl hover:border-blue-400 transition-all duration-300 group flex flex-col overflow-hidden relative cursor-pointer"
+                  className="bg-white rounded-2xl shadow-xs border border-slate-200 hover:shadow-xl hover:border-fuchsia-400 transition-all duration-300 group flex flex-col overflow-hidden relative cursor-pointer"
                   onClick={() => navigate(`/product/${product.id}`)}
                 >
                   {/* Badges superiores */}
@@ -451,12 +455,12 @@ export default function Home() {
                   {/* Información */}
                   <div className="p-4 flex flex-col flex-1">
                     {catObj && (
-                      <span className="text-[11px] font-bold text-blue-600 uppercase tracking-wider mb-1 line-clamp-1">
+                      <span className="text-[11px] font-bold text-fuchsia-800 uppercase tracking-wider mb-1 line-clamp-1">
                         {catObj.name}
                       </span>
                     )}
 
-                    <h3 className="text-sm font-bold text-slate-800 line-clamp-2 leading-snug min-h-[38px] group-hover:text-blue-600 transition-colors">
+                    <h3 className="text-sm font-bold text-slate-800 line-clamp-2 leading-snug min-h-[38px] group-hover:text-fuchsia-700 transition-colors">
                       {product.name}
                     </h3>
                     
@@ -464,7 +468,7 @@ export default function Home() {
                       <div className="flex items-baseline gap-2 flex-wrap">
                         {product.promotionalPrice && product.promotionalPrice < product.price ? (
                           <>
-                            <span className="text-xl sm:text-2xl font-black text-rose-600 tracking-tight">
+                            <span className="text-xl sm:text-2xl font-black text-fuchsia-950 font-serif tracking-tight">
                               ${Number(product.promotionalPrice).toLocaleString('es-AR')}
                             </span>
                             <span className="text-xs text-slate-400 line-through font-semibold">
@@ -472,14 +476,14 @@ export default function Home() {
                             </span>
                           </>
                         ) : (
-                          <span className="text-2xl font-black text-slate-900 tracking-tight">
+                          <span className="text-2xl font-black text-slate-900 tracking-tight font-serif">
                             ${Number(product.price).toLocaleString('es-AR')}
                           </span>
                         )}
                       </div>
                       
                       <p className="text-[11px] text-zinc-500 font-bold mt-1 flex items-center gap-1">
-                        <Truck size={12} className="text-rose-500" /> Envíos a todo el país
+                        <Truck size={12} className="text-fuchsia-600" /> Envíos a todo el país
                       </p>
                     </div>
                   </div>
@@ -489,7 +493,7 @@ export default function Home() {
                     <button 
                       onClick={(e) => handleAddToCart(product.id, e)}
                       disabled={product.stock === 0}
-                      className="w-full bg-slate-900 text-white py-2.5 rounded-xl font-bold text-xs hover:bg-blue-600 transition-colors disabled:bg-slate-300 flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+                      className="w-full bg-[#1f002b] text-white py-2.5 rounded-xl font-bold text-xs hover:bg-fuchsia-700 transition-colors disabled:bg-slate-300 flex items-center justify-center gap-2 cursor-pointer shadow-xs"
                     >
                       <ShoppingCart size={14} />
                       {product.stock === 0 ? 'Agotado' : 'Agregar al carrito'}

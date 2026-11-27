@@ -253,7 +253,7 @@ export default function Cart() {
                     {user.points >= loyaltySettings.minPointsToRedeem ? (
                       <p className="text-emerald-600 font-bold text-xs">¡Felicidades! Has alcanzado la consigna de {loyaltySettings.minPointsToRedeem} pts. ¡Pronto recibirás tu premio!</p>
                     ) : (
-                      <p className="text-emerald-600 mb-3 text-xs">Consigna de la semana: suma {loyaltySettings.minPointsToRedeem} pts para ganar recompensas únicas.</p>
+                      <p className="text-emerald-600 mb-3 text-xs">Consigna de la semana: suma {loyaltySettings.minPointsToRedeem} pts para ganar recompensas unicas.</p>
                     )}
                   </div>
                 )}

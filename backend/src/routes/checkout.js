@@ -126,7 +126,7 @@ router.post('/create-order', authenticate, async (req, res) => {
       return res.status(400).json({ success: false, message: 'Error en Mercado Pago: ' + (mpError.message || 'Error desconocido') });
     }
 
-    // Guardar orden (los puntos quedan registrados para ser acreditados ÚNICAMENTE cuando el pago se apruebe)
+    // Guardar orden (los puntos quedan registrados para ser acreditados UNICAMENTE cuando el pago se apruebe)
     await db.insert(orders).values({
       id: orderId,
       userId,
@@ -185,7 +185,7 @@ export async function completeOrderPayment(orderId, paymentId = null) {
     updatedAt: new Date(),
   }).where(eq(orders.id, orderId));
 
-  // 2. Sumar puntos al usuario ÚNICAMENTE tras compra completada y aprobada
+  // 2. Sumar puntos al usuario UNICAMENTE tras compra completada y aprobada
   const pointsToAward = order.pointsAwarded || 0;
   if (pointsToAward > 0) {
     const userRec = await db.select().from(users).where(eq(users.id, order.userId)).limit(1);

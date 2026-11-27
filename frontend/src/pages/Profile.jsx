@@ -84,23 +84,23 @@ export default function Profile() {
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="bg-white rounded-3xl shadow-xl border border-zinc-100 overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-zinc-900 via-rose-950 to-zinc-900 p-8 text-white relative">
+        <div className="bg-gradient-to-r from-[#170020] via-[#330045] to-[#170020] p-8 text-white relative">
           <div className="flex items-center gap-5">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-400 to-rose-500 text-zinc-900 flex items-center justify-center font-black text-3xl shadow-lg">
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-400 to-fuchsia-600 text-zinc-900 flex items-center justify-center font-black text-3xl shadow-lg">
               {user.name?.charAt(0).toUpperCase()}
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-black">{user.name}</h1>
+                <h1 className="text-2xl font-black font-serif">{user.name}</h1>
                 {user.role === 'ADMIN' && (
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-rose-500 text-white uppercase tracking-wider">
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-fuchsia-600 text-white uppercase tracking-wider">
                     Admin
                   </span>
                 )}
               </div>
               <p className="text-zinc-300 text-sm mt-1">{user.email}</p>
               <div className="inline-flex items-center gap-1.5 mt-3 px-3 py-1 rounded-full bg-white/10 text-amber-300 text-xs font-bold border border-white/10">
-                <Gift size={14} /> Puntos acumulados: {user.points || 0} pts
+                <Gift size={14} /> Puntos acumulados: {user.points || 0} pts UNICA
               </div>
             </div>
           </div>

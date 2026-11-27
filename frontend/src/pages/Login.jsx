@@ -40,7 +40,7 @@ export default function Login() {
       if (mode === 'login') {
         const res = await login(formData.email, formData.password);
         if (res.success) {
-          toast.success('¡Bienvenido a ÚNICA Perfumería!');
+          toast.success('¡Bienvenido a UNICA Perfumería!');
           navigate('/');
         } else {
           setError(res.message || 'Error al iniciar sesión');
@@ -99,11 +99,11 @@ export default function Login() {
     <div className="min-h-[80vh] flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-zinc-50">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <Link to="/" className="inline-block mb-4">
-          <img src="/unica-logo.svg" alt="ÚNICA Perfumería" className="h-12 mx-auto" />
+          <img src="/unica-logo-trans.png" alt="UNICA Perfumería" className="h-16 mx-auto object-contain" />
         </Link>
-        <h2 className="text-3xl font-black text-zinc-900 tracking-tight">
+        <h2 className="text-3xl font-black text-zinc-900 tracking-tight font-serif">
           {mode === 'login' && '¡Hola! Ingresa a tu cuenta'}
-          {mode === 'register' && 'Crea tu cuenta en ÚNICA'}
+          {mode === 'register' && 'Crea tu cuenta en UNICA'}
           {mode === 'forgot' && 'Recuperar Contraseña'}
         </h2>
         <p className="text-xs text-zinc-500 mt-1">

@@ -60,7 +60,7 @@ router.post('/register', async (req, res) => {
     const id = crypto.randomUUID();
     const newReferralCode = crypto.randomBytes(4).toString('hex');
 
-    // El nuevo usuario inicia con 0 puntos. Únicamente sumará puntos si realiza una compra o refiere a alguien.
+    // El nuevo usuario inicia con 0 puntos. Unicamente sumará puntos si realiza una compra o refiere a alguien.
     await db.insert(users).values({
       id,
       name,
