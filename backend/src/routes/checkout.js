@@ -11,7 +11,9 @@ dotenv.config();
 
 const router = express.Router();
 
-const mpClient = new MercadoPagoConfig({ accessToken: (process.env.MERCADOPAGO_ACCESS_TOKEN || 'TEST-dummy-token').trim() });
+const mpClient = new MercadoPagoConfig({ 
+  accessToken: (process.env.MERCADOPAGO_ACCESS_TOKEN || 'APP_USR-1517491838312595-112718-c7722c674102066292ce992e8ba10a1e-3710657511').trim() 
+});
 
 // POST /api/checkout/create-order
 router.post('/create-order', authenticate, async (req, res) => {
@@ -107,16 +109,24 @@ router.post('/create-order', authenticate, async (req, res) => {
 
     try {
       const preference = new Preference(mpClient);
+      const defaultAppUrl = process.env.RENDER_EXTERNAL_URL || 'https://unicatienda.onrender.com';
+      const baseUrl = (process.env.APP_URL && !process.env.APP_URL.includes('localhost'))
+        ? process.env.APP_URL.trim()
+        : defaultAppUrl;
+      const apiUrl = (process.env.API_URL && !process.env.API_URL.includes('my-api-domain'))
+        ? process.env.API_URL.trim()
+        : baseUrl;
+
       const mpResponse = await preference.create({
         body: {
           items: mpItems,
           back_urls: {
-            success: `${(process.env.APP_URL || 'http://localhost:5173').trim()}/orders?payment=success`,
-            failure: `${(process.env.APP_URL || 'http://localhost:5173').trim()}/orders?payment=failure`,
-            pending: `${(process.env.APP_URL || 'http://localhost:5173').trim()}/orders?payment=pending`,
+            success: `${baseUrl}/orders?payment=success`,
+            failure: `${baseUrl}/orders?payment=failure`,
+            pending: `${baseUrl}/orders?payment=pending`,
           },
           external_reference: orderId,
-          notification_url: `${(process.env.API_URL || 'https://my-api-domain.com').trim()}/api/checkout/webhook`,
+          notification_url: `${apiUrl}/api/checkout/webhook`,
         }
       });
       initPoint = mpResponse.init_point || mpResponse.sandbox_init_point;

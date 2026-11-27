@@ -73,23 +73,12 @@ export default function FloatingWhatsApp() {
         {!isExpanded && (
           <button 
             onClick={() => setIsExpanded(true)}
-            className="w-8 h-8 rounded-full bg-[#200030] text-fuchsia-300 border border-fuchsia-500/40 hover:bg-fuchsia-900/60 transition flex items-center justify-center text-xs shadow-lg cursor-pointer"
+            className="w-9 h-9 rounded-full bg-[#200030] text-fuchsia-300 border border-fuchsia-500/40 hover:bg-fuchsia-900/60 transition flex items-center justify-center text-xs shadow-lg cursor-pointer"
             title="Mostrar opciones de contacto"
           >
-            <ChevronUp size={16} />
+            <ChevronUp size={18} />
           </button>
         )}
-
-        {/* Instagram Icon Button with Magnet & FA */}
-        <MagnetButton
-          href={instagramUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          ariaLabel="Instagram Oficial UNICA.GC"
-          className="w-13 h-13 rounded-full bg-gradient-to-tr from-[#701a75] via-[#a21caf] to-[#d946ef] text-white flex items-center justify-center shadow-xl shadow-fuchsia-950/50 hover:scale-110 active:scale-95 transition-all duration-200 border-2 border-white/20"
-        >
-          <i className="fa-brands fa-instagram text-2xl drop-shadow-sm"></i>
-        </MagnetButton>
 
         {/* WhatsApp Icon Button with Magnet, FA & Ripple Glow */}
         <MagnetButton
