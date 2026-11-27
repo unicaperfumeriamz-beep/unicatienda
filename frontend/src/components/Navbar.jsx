@@ -4,17 +4,8 @@ import api from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import toast from 'react-hot-toast';
-import { Search, ShoppingCart, User, Menu, X, ChevronDown, Bell, Tag, Gift, Settings, CheckCheck, MessageCircle } from 'lucide-react';
-
-function InstagramIcon({ size = 14, className = "" }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
-      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
-      <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
-    </svg>
-  );
-}
+import ShinyText from './react-bits/ShinyText';
+import { Search, ShoppingCart, User, Menu, X, ChevronDown, Bell, Tag, Gift, Settings, CheckCheck } from 'lucide-react';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -101,10 +92,10 @@ export default function Navbar() {
     <header className="bg-gradient-to-r from-[#170020] via-[#2a0038] to-[#170020] shadow-xl border-b border-fuchsia-950/60 sticky top-0 z-50">
       
       {/* Top micro-bar with Social Links and contact */}
-      <div className="bg-[#12001a] border-b border-fuchsia-950/40 text-[11px] text-zinc-400 py-1 px-4 sm:px-6 lg:px-8">
+      <div className="bg-[#12001a] border-b border-fuchsia-950/40 text-[11px] text-zinc-400 py-1.5 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="text-amber-300/90 font-serif tracking-wider font-semibold">ESENCIALMENTE BUENO</span>
+            <ShinyText text="ESENCIALMENTE BUENO" speed={4} className="text-amber-300 font-serif tracking-widest text-[11px]" />
             <span className="hidden sm:inline text-zinc-600">•</span>
             <span className="hidden sm:inline text-zinc-400">Edición Oficial Nº 50</span>
           </div>
@@ -113,9 +104,9 @@ export default function Navbar() {
               href="https://instagram.com/unica.gc" 
               target="_blank" 
               rel="noreferrer" 
-              className="flex items-center gap-1 text-fuchsia-300 hover:text-white transition font-medium"
+              className="flex items-center gap-1.5 text-fuchsia-300 hover:text-white transition font-bold group"
             >
-              <InstagramIcon size={13} className="text-fuchsia-400" />
+              <i className="fa-brands fa-instagram text-fuchsia-400 text-sm group-hover:scale-110 transition-transform"></i>
               <span>@UNICA.GC</span>
             </a>
             <span className="text-zinc-700">|</span>
@@ -123,9 +114,9 @@ export default function Navbar() {
               href="https://wa.me/5492616098252?text=Hola%20UNICA%2C%20quisiera%20hacer%20una%20consulta" 
               target="_blank" 
               rel="noreferrer" 
-              className="flex items-center gap-1 text-emerald-400 hover:text-white transition font-medium"
+              className="flex items-center gap-1.5 text-emerald-400 hover:text-white transition font-bold group"
             >
-              <MessageCircle size={12} />
+              <i className="fa-brands fa-whatsapp text-emerald-400 text-sm group-hover:scale-110 transition-transform"></i>
               <span>261 609-8252</span>
             </a>
           </div>
@@ -331,12 +322,15 @@ export default function Navbar() {
             <Link to="/?ofertas=true#catalogo" onClick={() => setIsMenuOpen(false)} className="block px-3 py-2.5 font-bold text-amber-400 hover:bg-fuchsia-950/60 rounded-lg">Ofertas Especiales</Link>
 
             {/* Redes en movil */}
-            <div className="py-2 px-3 flex items-center gap-4 text-xs border-y border-fuchsia-950/60 my-2">
-              <a href="https://instagram.com/unica.gc" target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-fuchsia-400 font-bold">
-                <InstagramIcon size={14} /> @UNICA.GC
+            <div className="py-2.5 px-3 flex items-center justify-around text-xs border-y border-fuchsia-950/60 my-2 bg-[#12001a]/60 rounded-xl">
+              <a href="https://instagram.com/unica.gc" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-fuchsia-400 font-bold hover:text-white transition">
+                <i className="fa-brands fa-instagram text-base"></i>
+                <span>@UNICA.GC</span>
               </a>
-              <a href="https://wa.me/5492616098252" target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-emerald-400 font-bold">
-                <MessageCircle size={14} /> 261 609-8252
+              <span className="text-zinc-700">|</span>
+              <a href="https://wa.me/5492616098252" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-emerald-400 font-bold hover:text-white transition">
+                <i className="fa-brands fa-whatsapp text-base"></i>
+                <span>261 609-8252</span>
               </a>
             </div>
 

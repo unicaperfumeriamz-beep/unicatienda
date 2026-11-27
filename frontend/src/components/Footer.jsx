@@ -1,16 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Sparkles, MessageCircle, Mail, MapPin, ShieldCheck, Heart, User } from 'lucide-react';
-
-function InstagramIcon({ size = 18, className = "" }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
-      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
-      <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
-    </svg>
-  );
-}
+import ShinyText from './react-bits/ShinyText';
+import MagnetButton from './react-bits/MagnetButton';
+import { Sparkles, ShieldCheck, Heart, User } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -73,55 +65,55 @@ export default function Footer() {
           <div>
             <h3 className="font-bold text-white mb-4 text-xs tracking-widest uppercase font-serif text-fuchsia-300">Contacto & Redes</h3>
             <div className="space-y-3.5 text-sm text-zinc-400">
-              {/* WhatsApp */}
+              {/* WhatsApp con FA icon */}
               <a 
                 href="https://wa.me/5492616098252?text=Hola%20UNICA%2C%20quisiera%20hacer%20una%20consulta%20sobre%20los%20productos" 
                 target="_blank" 
                 rel="noreferrer" 
-                className="flex items-center gap-2 text-emerald-400 hover:text-emerald-300 font-bold transition-colors group"
+                className="flex items-center gap-3 p-2 rounded-xl bg-emerald-950/30 hover:bg-emerald-900/40 border border-emerald-500/30 text-emerald-300 font-bold transition-all group"
               >
-                <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <MessageCircle size={18} className="text-emerald-400" />
+                <div className="w-9 h-9 rounded-lg bg-emerald-500 text-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-md shadow-emerald-900/50">
+                  <i className="fa-brands fa-whatsapp text-xl"></i>
                 </div>
                 <div>
-                  <span className="block text-xs text-zinc-400 font-normal">WhatsApp Directo</span>
-                  <span>261 609-8252</span>
+                  <span className="block text-[11px] text-zinc-400 font-normal">WhatsApp Directo</span>
+                  <span className="text-sm font-sans tracking-wide text-white">261 609-8252</span>
                 </div>
               </a>
 
-              {/* Instagram */}
+              {/* Instagram con FA icon */}
               <a 
                 href="https://instagram.com/unica.gc" 
                 target="_blank" 
                 rel="noreferrer" 
-                className="flex items-center gap-2 text-fuchsia-400 hover:text-fuchsia-300 font-bold transition-colors group"
+                className="flex items-center gap-3 p-2 rounded-xl bg-fuchsia-950/30 hover:bg-fuchsia-900/40 border border-fuchsia-500/30 text-fuchsia-300 font-bold transition-all group"
               >
-                <div className="w-8 h-8 rounded-lg bg-fuchsia-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <InstagramIcon size={18} className="text-fuchsia-400" />
+                <div className="w-9 h-9 rounded-lg bg-gradient-to-tr from-amber-400 via-rose-500 to-purple-600 text-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-md shadow-fuchsia-950/50">
+                  <i className="fa-brands fa-instagram text-lg"></i>
                 </div>
                 <div>
-                  <span className="block text-xs text-zinc-400 font-normal">Instagram Oficial</span>
-                  <span>@UNICA.GC</span>
+                  <span className="block text-[11px] text-zinc-400 font-normal">Instagram Oficial</span>
+                  <span className="text-sm font-sans tracking-wide text-white">@UNICA.GC</span>
                 </div>
               </a>
 
-              {/* Email */}
+              {/* Email con FA icon */}
               <a 
                 href="mailto:unica.gc.mz@gmail.com" 
-                className="flex items-center gap-2 text-zinc-300 hover:text-white transition-colors group"
+                className="flex items-center gap-3 p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 hover:text-white transition-all group"
               >
-                <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <Mail size={16} className="text-amber-400" />
+                <div className="w-9 h-9 rounded-lg bg-amber-500/20 text-amber-300 flex items-center justify-center group-hover:scale-110 transition-transform border border-amber-500/30">
+                  <i className="fa-solid fa-envelope text-sm"></i>
                 </div>
                 <div>
-                  <span className="block text-xs text-zinc-400 font-normal">Correo Electrónico</span>
-                  <span className="text-xs break-all">unica.gc.mz@gmail.com</span>
+                  <span className="block text-[11px] text-zinc-400 font-normal">Correo Electrónico</span>
+                  <span className="text-xs break-all text-zinc-200">unica.gc.mz@gmail.com</span>
                 </div>
               </a>
 
-              {/* Ubicacion */}
-              <div className="flex items-center gap-2 text-xs text-zinc-400 pt-1">
-                <MapPin size={16} className="text-fuchsia-400 shrink-0" />
+              {/* Ubicacion con FA icon */}
+              <div className="flex items-center gap-2.5 text-xs text-zinc-400 pt-1 px-2">
+                <i className="fa-solid fa-location-dot text-fuchsia-400"></i>
                 <span>Godoy Cruz, Mendoza, Argentina</span>
               </div>
             </div>

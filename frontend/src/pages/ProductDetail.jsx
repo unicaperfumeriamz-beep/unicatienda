@@ -202,10 +202,19 @@ export default function ProductDetail() {
               <button 
                 onClick={handleAddToCart}
                 disabled={product.stock === 0}
-                className="w-full bg-fuchsia-50 text-fuchsia-900 border border-fuchsia-200 font-bold py-4 rounded-xl hover:bg-fuchsia-100 transition-colors disabled:bg-zinc-100 disabled:text-zinc-400 cursor-pointer"
+                className="w-full bg-fuchsia-50 text-fuchsia-900 border border-fuchsia-200 font-bold py-3.5 rounded-xl hover:bg-fuchsia-100 transition-colors disabled:bg-zinc-100 disabled:text-zinc-400 cursor-pointer"
               >
                 Agregar al carrito
               </button>
+              <a
+                href={`https://wa.me/5492616098252?text=${encodeURIComponent(`Hola Roxana, quiero consultar por "${product.name}" (Cód: ${product.sku || ''}) de la Edición 50.`)}`}
+                target="_blank"
+                rel="noreferrer"
+                className="w-full flex items-center justify-center gap-2 bg-emerald-50 text-emerald-800 border border-emerald-300/80 font-bold py-3 rounded-xl hover:bg-emerald-100 transition-colors cursor-pointer text-sm"
+              >
+                <i className="fa-brands fa-whatsapp text-lg text-emerald-600"></i>
+                <span>Consultar con Roxana por WhatsApp</span>
+              </a>
             </div>
 
             <div className="mt-6 border-t border-zinc-100 pt-6">
