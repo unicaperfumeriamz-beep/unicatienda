@@ -72,12 +72,12 @@ export default function InteractiveMap({ lat, lng, onLocationChange }) {
       scrollWheelZoom: true,
     });
 
-    // Capa de tiles CARTO Voyager (calles nítidas, en español, sin bloqueos de dominio ni cuotas)
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png', {
-      subdomains: 'abcd',
+    // Capa de tiles OpenStreetMap (100% libre, sin API key, sin marcas de agua y de alta resolución)
+    L.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
+      subdomains: ['a', 'b', 'c'],
       maxZoom: 20,
       crossOrigin: true,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     }).addTo(map);
 
     const marker = L.marker([initialLat, initialLng], {
