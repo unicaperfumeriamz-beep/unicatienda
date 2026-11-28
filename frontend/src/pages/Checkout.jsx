@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { MapPin, Plus, CheckCircle2, ChevronRight, CreditCard, ShieldCheck, Truck, ShoppingBag, ArrowRight } from 'lucide-react';
+import { MapPin, Navigation, Compass, CheckCircle2, ChevronRight, CreditCard, ShieldCheck, Truck, ShoppingBag, ArrowRight, ExternalLink } from 'lucide-react';
 
 export default function Checkout() {
   const { user } = useAuth();
@@ -10,8 +10,19 @@ export default function Checkout() {
   const location = useLocation();
   const couponCode = location.state?.couponCode || null;
   
-  const [selectedAddress, setSelectedAddress] = useState(user?.address ? 'saved' : 'new');
-  const [newAddress, setNewAddress] = useState('');
+  const [addressForm, setAddressForm] = useState({
+    street: '',
+    number: '',
+    city: 'Godoy Cruz, Mendoza',
+    postalCode: '5501',
+    notes: '',
+    lat: -32.9238,
+    lng: -68.8456,
+    hasGeo: false,
+    accuracy: null,
+  });
+  const [locating, setLocating] = useState(false);
+  const [geoMsg, setGeoMsg] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [cartData, setCartData] = useState(null);
@@ -21,6 +32,70 @@ export default function Checkout() {
     navigate('/login');
     return null;
   }
+
+  // Pre-cargar si el usuario ya tiene dirección cargada en el perfil
+  useEffect(() => {
+    if (user?.address) {
+      setAddressForm(prev => ({
+        ...prev,
+        street: user.address,
+      }));
+    }
+  }, [user]);
+
+  const handleGetLiveLocation = () => {
+    if (!('geolocation' in navigator)) {
+      setGeoMsg({ type: 'error', text: 'Tu dispositivo o navegador no soporta geolocalización GPS.' });
+      return;
+    }
+    setLocating(true);
+    setGeoMsg({ type: 'info', text: 'Detectando satélites y señal GPS en tiempo real...' });
+
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude, longitude, accuracy } = pos.coords;
+        setAddressForm(prev => ({
+          ...prev,
+          lat: latitude,
+          lng: longitude,
+          hasGeo: true,
+          accuracy: Math.round(accuracy)
+        }));
+        setLocating(false);
+        setGeoMsg({
+          type: 'success',
+          text: `Ubicación GPS precisa fijada (Precisión: ±${Math.round(accuracy)}m).`
+        });
+
+        // Intentar autocompletar calle mediante reverse geocoding
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`);
+          const data = await res.json();
+          if (data && data.address) {
+            const road = data.address.road || data.address.pedestrian || data.address.neighbourhood || '';
+            const houseNumber = data.address.house_number || '';
+            const city = data.address.city || data.address.town || data.address.village || data.address.county || 'Mendoza';
+            const postcode = data.address.postcode || '';
+            setAddressForm(prev => ({
+              ...prev,
+              street: road || prev.street,
+              number: houseNumber || prev.number,
+              city: city || prev.city,
+              postalCode: postcode || prev.postalCode,
+            }));
+          }
+        } catch (_) {}
+      },
+      (err) => {
+        setLocating(false);
+        setGeoMsg({
+          type: 'error',
+          text: 'No se pudo obtener la señal GPS: ' + (err.message || 'Permiso denegado por el navegador')
+        });
+      },
+      { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
+    );
+  };
 
   useEffect(() => {
     async function fetchCart() {
@@ -40,18 +115,30 @@ export default function Checkout() {
 
   const handleCheckout = async (e) => {
     e.preventDefault();
-    const finalAddress = selectedAddress === 'saved' ? user.address : newAddress;
     
-    if (!finalAddress || finalAddress.trim() === '') {
-      setError('Por favor, ingresa o selecciona una dirección de envío para continuar.');
+    if (!addressForm.street.trim() || !addressForm.number.trim() || !addressForm.city.trim()) {
+      setError('Por favor completa los campos obligatorios: Calle, Altura y Localidad.');
       return;
     }
+
+    const shippingPayload = JSON.stringify({
+      street: addressForm.street.trim(),
+      number: addressForm.number.trim(),
+      city: addressForm.city.trim(),
+      postalCode: addressForm.postalCode.trim(),
+      notes: addressForm.notes.trim(),
+      lat: addressForm.lat,
+      lng: addressForm.lng,
+      hasGeo: addressForm.hasGeo,
+      accuracy: addressForm.accuracy,
+      fullText: `${addressForm.street.trim()} ${addressForm.number.trim()}, ${addressForm.city.trim()}${addressForm.postalCode ? ` (CP ${addressForm.postalCode.trim()})` : ''}`
+    });
     
     setLoading(true);
     setError('');
 
     try {
-      const res = await api.post('/checkout/create-order', { shippingAddress: finalAddress, couponCode });
+      const res = await api.post('/checkout/create-order', { shippingAddress: shippingPayload, couponCode });
       if (res.data.success) {
         const { initPoint } = res.data.data;
         if (initPoint && initPoint !== 'dummy') {
@@ -128,70 +215,170 @@ export default function Checkout() {
           <div className="flex-1 space-y-8">
             
             {/* Delivery Section */}
-            <div className="bg-white rounded-3xl p-8 shadow-xl shadow-slate-200/40 border border-slate-100 relative overflow-hidden group transition-all duration-300 hover:shadow-2xl hover:shadow-slate-200/50">
-              <div className="absolute top-0 left-0 w-1 h-full bg-blue-500 rounded-l-3xl"></div>
+            <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/40 border border-slate-100 relative overflow-hidden group transition-all duration-300">
+              <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-[#3b0052] to-fuchsia-600 rounded-l-3xl"></div>
               
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
-                  <Truck size={20} />
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-fuchsia-50 text-fuchsia-800 flex items-center justify-center border border-fuchsia-100">
+                    <Truck size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-slate-900">¿Dónde quieres recibirlo?</h3>
+                    <p className="text-xs text-slate-500">Carga tu dirección exacta y referencias para el despacho.</p>
+                  </div>
                 </div>
-                <h3 className="text-xl font-bold text-slate-900">¿Dónde quieres recibirlo?</h3>
+
+                {/* Botón GPS en tiempo real */}
+                <button
+                  type="button"
+                  onClick={handleGetLiveLocation}
+                  disabled={locating}
+                  className="px-3.5 py-2 rounded-xl text-xs font-bold bg-[#1d0028] text-amber-300 hover:bg-black transition-all flex items-center gap-2 border border-fuchsia-800/40 cursor-pointer shadow-sm hover:scale-[1.02] disabled:opacity-60 self-start sm:self-auto"
+                  title="Fijar ubicación precisa mediante GPS"
+                >
+                  <Navigation size={14} className={locating ? 'animate-spin text-amber-400' : 'text-amber-300'} />
+                  <span>{locating ? 'Detectando GPS...' : 'Ubicación Actual (GPS)'}</span>
+                </button>
               </div>
-              
-              <div className="space-y-4 pl-0 sm:pl-12">
-                {user?.address && (
-                  <label className={`block border-2 rounded-2xl p-5 cursor-pointer transition-all duration-300 ${selectedAddress === 'saved' ? 'border-blue-500 bg-blue-50/30 shadow-md shadow-blue-500/10 scale-[1.01]' : 'border-slate-100 hover:border-slate-300 hover:bg-slate-50'}`}>
-                    <div className="flex items-start gap-4">
-                      <div className="flex-shrink-0 mt-1">
-                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedAddress === 'saved' ? 'border-blue-600 bg-blue-600' : 'border-slate-300'}`}>
-                          {selectedAddress === 'saved' && <div className="w-2 h-2 bg-white rounded-full"></div>}
-                        </div>
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className={`font-bold ${selectedAddress === 'saved' ? 'text-blue-900' : 'text-slate-700'}`}>Enviar a mi domicilio</span>
-                          {selectedAddress === 'saved' && <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-blue-100 text-blue-700">Seleccionado</span>}
-                        </div>
-                        <p className="text-sm text-slate-600 leading-relaxed font-medium">{user.address}</p>
-                        <p className="text-sm text-slate-400 mt-2 flex items-center gap-2">
-                          <span className="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
-                          Recibe: {user.name}
+
+              {/* Mensaje de estado GPS */}
+              {geoMsg && (
+                <div className={`mb-5 p-3 rounded-xl text-xs font-semibold flex items-center gap-2 ${geoMsg.type === 'success' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : geoMsg.type === 'error' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-blue-50 text-blue-800 border border-blue-200'}`}>
+                  <Compass size={16} />
+                  <span>{geoMsg.text}</span>
+                </div>
+              )}
+
+              {/* Formulario de Dirección Estructurada */}
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                  <div className="sm:col-span-2">
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">
+                      Calle <span className="text-red-500">*</span>
+                    </label>
+                    <input 
+                      type="text" 
+                      value={addressForm.street} 
+                      onChange={(e) => setAddressForm({ ...addressForm, street: e.target.value })} 
+                      placeholder="Ej: San Martín, Belgrano, Av. Libertador"
+                      required
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-fuchsia-500 focus:bg-white outline-none transition-all text-sm font-medium text-slate-900"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">
+                      Altura / N° <span className="text-red-500">*</span>
+                    </label>
+                    <input 
+                      type="text" 
+                      value={addressForm.number} 
+                      onChange={(e) => setAddressForm({ ...addressForm, number: e.target.value })} 
+                      placeholder="Ej: 1234"
+                      required
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-fuchsia-500 focus:bg-white outline-none transition-all text-sm font-medium text-slate-900"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">
+                      Localidad / Ciudad <span className="text-red-500">*</span>
+                    </label>
+                    <input 
+                      type="text" 
+                      value={addressForm.city} 
+                      onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })} 
+                      placeholder="Ej: Godoy Cruz, Mendoza, CABA, Córdoba"
+                      required
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-fuchsia-500 focus:bg-white outline-none transition-all text-sm font-medium text-slate-900"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">
+                      Código Postal
+                    </label>
+                    <input 
+                      type="text" 
+                      value={addressForm.postalCode} 
+                      onChange={(e) => setAddressForm({ ...addressForm, postalCode: e.target.value })} 
+                      placeholder="Ej: 5501"
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-fuchsia-500 focus:bg-white outline-none transition-all text-sm font-medium text-slate-900"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">
+                    Instrucciones para la entrega <span className="text-slate-400 font-normal lowercase">(piso, depto, timbre, referencias)</span>
+                  </label>
+                  <textarea 
+                    value={addressForm.notes} 
+                    onChange={(e) => setAddressForm({ ...addressForm, notes: e.target.value })} 
+                    placeholder="Ej: Piso 2 Depto B. Portón gris, tocar timbre 'Toloza'. Dejar en recepción si no hay nadie."
+                    rows="2"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-fuchsia-500 focus:bg-white outline-none transition-all text-sm font-medium text-slate-900 resize-none"
+                  ></textarea>
+                </div>
+
+                {/* Mapa Interactivo con Ubicación Precisa */}
+                <div className="pt-2">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                      <MapPin size={15} className="text-rose-500" />
+                      Punto de Entrega en el Mapa
+                      {addressForm.hasGeo && (
+                        <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-md">
+                          GPS Activo
+                        </span>
+                      )}
+                    </span>
+                    <a 
+                      href={`https://www.google.com/maps?q=${addressForm.lat},${addressForm.lng}`} 
+                      target="_blank" 
+                      rel="noreferrer"
+                      className="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                    >
+                      <span>Abrir en Google Maps</span>
+                      <ExternalLink size={12} />
+                    </a>
+                  </div>
+
+                  <div className="w-full h-56 sm:h-64 rounded-2xl overflow-hidden border-2 border-slate-200 relative shadow-inner bg-slate-100">
+                    <iframe
+                      title="Mapa de Entrega"
+                      width="100%"
+                      height="100%"
+                      frameBorder="0"
+                      scrolling="no"
+                      marginHeight="0"
+                      marginWidth="0"
+                      src={`https://www.openstreetmap.org/export/embed.html?bbox=${addressForm.lng - 0.008}%2C${addressForm.lat - 0.005}%2C${addressForm.lng + 0.008}%2C${addressForm.lat + 0.005}&layer=mapnik&marker=${addressForm.lat}%2C${addressForm.lng}`}
+                      className="w-full h-full"
+                    ></iframe>
+                    
+                    {/* Tarjeta de Coordenadas flotante */}
+                    <div className="absolute bottom-2.5 left-2.5 right-2.5 sm:right-auto bg-white/95 backdrop-blur-md px-3.5 py-2 rounded-xl shadow-lg border border-slate-200 text-xs flex items-center justify-between gap-3">
+                      <div>
+                        <p className="font-bold text-slate-800">
+                          {addressForm.street ? `${addressForm.street} ${addressForm.number || ''}` : 'Ubicación seleccionada'}
+                        </p>
+                        <p className="text-[11px] text-slate-500 font-mono">
+                          Lat: {addressForm.lat.toFixed(5)} | Lng: {addressForm.lng.toFixed(5)}
                         </p>
                       </div>
-                    </div>
-                  </label>
-                )}
-
-                <label className={`block border-2 rounded-2xl p-5 cursor-pointer transition-all duration-300 ${selectedAddress === 'new' ? 'border-blue-500 bg-blue-50/30 shadow-md shadow-blue-500/10 scale-[1.01]' : 'border-slate-100 hover:border-slate-300 hover:bg-slate-50'}`}>
-                  <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 mt-1">
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedAddress === 'new' ? 'border-blue-600 bg-blue-600' : 'border-slate-300'}`}>
-                        {selectedAddress === 'new' && <div className="w-2 h-2 bg-white rounded-full"></div>}
-                      </div>
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className={`font-bold ${selectedAddress === 'new' ? 'text-blue-900' : 'text-slate-700'}`}>Elegir domicilio alternativo</span>
-                      </div>
-                      <p className="text-sm text-slate-500">Ingresa una nueva dirección para este envío.</p>
-                      
-                      <div className={`grid transition-all duration-500 ease-in-out overflow-hidden ${selectedAddress === 'new' ? 'grid-rows-[1fr] opacity-100 mt-4' : 'grid-rows-[0fr] opacity-0'}`}>
-                        <div className="min-h-0">
-                          <div className="relative">
-                            <MapPin className="absolute left-4 top-3.5 text-slate-400" size={18} />
-                            <input 
-                              type="text" 
-                              value={newAddress} 
-                              onChange={(e) => setNewAddress(e.target.value)} 
-                              placeholder="Ej: Av. Libertador 1234, CABA"
-                              className="w-full pl-11 pr-4 py-3 bg-white border-2 border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-slate-900 font-medium placeholder:font-normal"
-                            />
-                          </div>
-                        </div>
-                      </div>
+                      <button
+                        type="button"
+                        onClick={handleGetLiveLocation}
+                        className="text-[11px] font-bold text-fuchsia-700 hover:text-fuchsia-900 bg-fuchsia-50 hover:bg-fuchsia-100 px-2.5 py-1.5 rounded-lg border border-fuchsia-200 transition-colors cursor-pointer"
+                      >
+                        Recalcular GPS
+                      </button>
                     </div>
                   </div>
-                </label>
+                </div>
+
               </div>
             </div>
 

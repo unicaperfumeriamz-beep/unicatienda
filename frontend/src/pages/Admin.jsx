@@ -12,12 +12,31 @@ import {
   X, Edit, Trash2, Plus, Minus, LogOut, ArrowLeft, Wand2, Download, 
   Gift, Layers, Eye, MousePointerClick, Activity, Percent, ArrowUpRight, 
   CheckCircle2, Clock, BarChart3, Flame, ExternalLink, RefreshCw, ShoppingCart, Info,
-  Menu, Tag, BookOpen, Upload, FileText, Sparkles
+  Menu, Tag, BookOpen, Upload, FileText, Sparkles, MapPin, Truck, PackageCheck, Navigation
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import ImageUploader from '../components/ImageUploader';
 
 const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#6366f1'];
+
+const parseShippingAddress = (raw) => {
+  if (!raw) return null;
+  try {
+    if (typeof raw === 'string' && raw.trim().startsWith('{')) {
+      return JSON.parse(raw);
+    }
+  } catch (_) {}
+  return {
+    street: raw,
+    number: '',
+    city: '',
+    postalCode: '',
+    notes: '',
+    fullText: raw,
+    lat: null,
+    lng: null
+  };
+};
 
 export default function Admin() {
   const { user, logout } = useAuth();
@@ -1208,114 +1227,195 @@ export default function Admin() {
         )}
 
         {!loading && activeTab === 'orders' && (
-          <div className="bg-white rounded-2xl shadow-sm border border-zinc-200 overflow-hidden">
-            <div className="p-4 md:p-6 border-b border-zinc-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-zinc-50">
-              <div>
-                <h3 className="text-xl font-bold text-zinc-900">Gestión de Pedidos y Compras</h3>
-                <p className="text-xs text-zinc-500 mt-0.5">Controla pedidos pagados, cancelados y compras pendientes de la tienda.</p>
+          <div className="space-y-6">
+            {/* Alerta de Despacho Inmediato para Pedidos Pagados */}
+            {ordersList.filter(o => o.paymentStatus === 'APPROVED' && o.status !== 'SHIPPED' && o.status !== 'DELIVERED').length > 0 && (
+              <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-amber-500/15 via-rose-500/15 to-amber-500/15 border-2 border-amber-500/50 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-12 h-12 rounded-xl bg-amber-500 text-white flex items-center justify-center flex-shrink-0 shadow-md shadow-amber-500/30">
+                    <Truck size={24} className="animate-bounce" />
+                  </div>
+                  <div>
+                    <h4 className="font-black text-amber-950 text-base flex items-center gap-2">
+                      🚨 ¡ALERTA: PEDIDOS PAGADOS LISTOS PARA DESPACHAR!
+                    </h4>
+                    <p className="text-xs text-amber-900 font-medium mt-0.5">
+                      Tienes <strong>{ordersList.filter(o => o.paymentStatus === 'APPROVED' && o.status !== 'SHIPPED' && o.status !== 'DELIVERED').length} pedido(s)</strong> abonado(s) por Mercado Pago que requieren empaque y despacho de envío inmediato.
+                    </p>
+                  </div>
+                </div>
               </div>
-              <span className="text-xs font-bold px-3 py-1 bg-zinc-200 text-zinc-700 rounded-lg">
-                {ordersList.length} pedidos registrados
-              </span>
-            </div>
+            )}
 
-            <div className="overflow-x-auto w-full">
-              <table className="w-full text-left border-collapse min-w-[850px]">
-                <thead>
-                  <tr className="bg-zinc-100 text-zinc-500 text-sm uppercase tracking-wider">
-                    <th className="p-4 font-bold">ID / Fecha</th>
-                    <th className="p-4 font-bold">Cliente</th>
-                    <th className="p-4 font-bold">Productos</th>
-                    <th className="p-4 font-bold">Total</th>
-                    <th className="p-4 font-bold">Estado</th>
-                    <th className="p-4 font-bold text-right">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-zinc-100 text-sm">
-                  {ordersList.length === 0 && (
-                    <tr>
-                      <td colSpan="6" className="p-12 text-center text-zinc-500">
-                        <ShoppingBag className="w-12 h-12 text-zinc-300 mx-auto mb-2" />
-                        <p className="font-bold text-zinc-700">No hay pedidos registrados</p>
-                        <p className="text-xs text-zinc-400 mt-1">Los pedidos de tus clientes aparecerán aquí automáticamente.</p>
-                      </td>
+            <div className="bg-white rounded-2xl shadow-sm border border-zinc-200 overflow-hidden">
+              <div className="p-4 md:p-6 border-b border-zinc-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-zinc-50">
+                <div>
+                  <h3 className="text-xl font-bold text-zinc-900">Gestión de Pedidos y Despachos</h3>
+                  <p className="text-xs text-zinc-500 mt-0.5">Controla pedidos pagados, direcciones con mapa en tiempo real y despacho de envíos.</p>
+                </div>
+                <span className="text-xs font-bold px-3 py-1 bg-zinc-200 text-zinc-700 rounded-lg">
+                  {ordersList.length} pedidos registrados
+                </span>
+              </div>
+
+              <div className="overflow-x-auto w-full">
+                <table className="w-full text-left border-collapse min-w-[850px]">
+                  <thead>
+                    <tr className="bg-zinc-100 text-zinc-500 text-sm uppercase tracking-wider">
+                      <th className="p-4 font-bold">ID / Fecha</th>
+                      <th className="p-4 font-bold">Cliente & Entrega</th>
+                      <th className="p-4 font-bold">Productos</th>
+                      <th className="p-4 font-bold">Total</th>
+                      <th className="p-4 font-bold">Estado</th>
+                      <th className="p-4 font-bold text-right">Acciones</th>
                     </tr>
-                  )}
-                  {ordersList.map(ord => (
-                    <tr key={ord.id} className="hover:bg-zinc-50 transition-colors">
-                      <td className="p-4">
-                        <span className="font-mono text-xs font-bold text-zinc-700">#{ord.id.slice(0, 8)}</span>
-                        <div className="text-xs text-zinc-400 mt-0.5">
-                          {new Date(ord.createdAt).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <div className="font-bold text-zinc-900">{ord.userName}</div>
-                        <div className="text-xs text-zinc-500">{ord.userEmail}</div>
-                        {ord.shippingAddress && <div className="text-[11px] text-zinc-400 truncate max-w-xs">{ord.shippingAddress}</div>}
-                      </td>
-                      <td className="p-4">
-                        <div className="space-y-1 max-w-xs">
-                          {ord.items?.map((it, idx) => (
-                            <div key={idx} className="text-xs text-zinc-700 flex items-center gap-1.5">
-                              <span className="font-bold text-zinc-900">{it.quantity}x</span>
-                              <span className="truncate">{it.productName}</span>
-                              <span className="text-zinc-400 font-mono">(${Number(it.price).toLocaleString('es-AR')})</span>
-                            </div>
-                          ))}
-                        </div>
-                      </td>
-                      <td className="p-4 font-black text-emerald-600 text-base">
-                        ${Number(ord.totalAmount).toLocaleString('es-AR')}
-                      </td>
-                      <td className="p-4">
-                        {ord.paymentStatus === 'APPROVED' ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
-                            Aprobado
-                          </span>
-                        ) : ord.paymentStatus === 'CANCELLED' || ord.status === 'CANCELLED' ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800">
-                            Cancelado
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
-                            Pendiente
-                          </span>
-                        )}
-                      </td>
-                      <td className="p-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          {ord.paymentStatus !== 'APPROVED' && (
-                            <>
-                              <button
-                                onClick={() => handleUpdateOrderStatus(ord.id, 'APPROVED', 'APPROVED')}
-                                className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-xs font-bold transition-colors"
-                                title="Marcar como Aprobado"
-                              >
-                                Aprobar
-                              </button>
-                              <button
-                                onClick={() => handleUpdateOrderStatus(ord.id, 'CANCELLED', 'CANCELLED')}
-                                className="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-lg text-xs font-bold transition-colors"
-                                title="Marcar como Cancelado"
-                              >
-                                Cancelar
-                              </button>
-                            </>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-100 text-sm">
+                    {ordersList.length === 0 && (
+                      <tr>
+                        <td colSpan="6" className="p-12 text-center text-zinc-500">
+                          <ShoppingBag className="w-12 h-12 text-zinc-300 mx-auto mb-2" />
+                          <p className="font-bold text-zinc-700">No hay pedidos registrados</p>
+                          <p className="text-xs text-zinc-400 mt-1">Los pedidos de tus clientes aparecerán aquí automáticamente.</p>
+                        </td>
+                      </tr>
+                    )}
+                    {ordersList.map(ord => (
+                      <tr key={ord.id} className="hover:bg-zinc-50 transition-colors">
+                        <td className="p-4">
+                          <span className="font-mono text-xs font-bold text-zinc-700">#{ord.id.slice(0, 8)}</span>
+                          <div className="text-xs text-zinc-400 mt-0.5">
+                            {new Date(ord.createdAt).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <div className="font-bold text-zinc-900">{ord.userName}</div>
+                          <div className="text-xs text-zinc-500">{ord.userEmail}</div>
+                          {(() => {
+                            const addr = parseShippingAddress(ord.shippingAddress);
+                            if (!addr) return null;
+                            return (
+                              <div className="mt-2 text-xs space-y-1 bg-zinc-50 p-3 rounded-xl border border-zinc-200 max-w-sm">
+                                <p className="font-bold text-zinc-900 flex items-center gap-1.5">
+                                  <MapPin size={14} className="text-rose-500 flex-shrink-0" />
+                                  {addr.street ? `${addr.street} ${addr.number || ''}` : addr.fullText}
+                                </p>
+                                {addr.city && (
+                                  <p className="text-[11px] text-zinc-600 pl-5">
+                                    {addr.city} {addr.postalCode ? `(CP ${addr.postalCode})` : ''}
+                                  </p>
+                                )}
+                                {addr.notes && (
+                                  <div className="mt-1.5 p-2 bg-amber-50 border border-amber-200 rounded-lg text-[11px] text-amber-900 leading-relaxed font-sans">
+                                    <strong>Instrucciones:</strong> {addr.notes}
+                                  </div>
+                                )}
+                                {addr.lat && addr.lng ? (
+                                  <div className="pt-1.5 flex items-center gap-2">
+                                    <a
+                                      href={`https://www.google.com/maps?q=${addr.lat},${addr.lng}`}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-lg border border-blue-200 transition-colors"
+                                    >
+                                      <MapPin size={13} className="text-rose-500" />
+                                      <span>Ver Ubicación GPS en Google Maps</span>
+                                      <ExternalLink size={11} />
+                                    </a>
+                                  </div>
+                                ) : addr.fullText ? (
+                                  <div className="pt-1 flex items-center gap-2">
+                                    <a
+                                      href={`https://www.google.com/maps?q=${encodeURIComponent(addr.fullText)}`}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 transition-colors"
+                                    >
+                                      <span>Buscar en Google Maps</span>
+                                      <ExternalLink size={10} />
+                                    </a>
+                                  </div>
+                                ) : null}
+                              </div>
+                            );
+                          })()}
+                        </td>
+                        <td className="p-4">
+                          <div className="space-y-1 max-w-xs">
+                            {ord.items?.map((it, idx) => (
+                              <div key={idx} className="text-xs text-zinc-700 flex items-center gap-1.5">
+                                <span className="font-bold text-zinc-900">{it.quantity}x</span>
+                                <span className="truncate">{it.productName}</span>
+                                <span className="text-zinc-400 font-mono">(${Number(it.price).toLocaleString('es-AR')})</span>
+                              </div>
+                            ))}
+                          </div>
+                        </td>
+                        <td className="p-4 font-black text-emerald-600 text-base">
+                          ${Number(ord.totalAmount).toLocaleString('es-AR')}
+                        </td>
+                        <td className="p-4">
+                          {ord.status === 'SHIPPED' ? (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800 border border-blue-200">
+                              <Truck size={13} /> Despachado
+                            </span>
+                          ) : ord.paymentStatus === 'APPROVED' ? (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-black bg-amber-100 text-amber-900 border border-amber-300 animate-pulse">
+                              <Truck size={13} /> Listo para Despachar
+                            </span>
+                          ) : ord.paymentStatus === 'CANCELLED' || ord.status === 'CANCELLED' ? (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800">
+                              Cancelado
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
+                              Pendiente
+                            </span>
                           )}
-                          <button
-                            onClick={() => confirmDelete(ord.id, 'orders')}
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                            title="Eliminar Pedido"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                        </td>
+                        <td className="p-4 text-right">
+                          <div className="flex items-center justify-end gap-2 flex-wrap">
+                            {ord.paymentStatus === 'APPROVED' && ord.status !== 'SHIPPED' && (
+                              <button
+                                onClick={() => handleUpdateOrderStatus(ord.id, 'SHIPPED', 'APPROVED')}
+                                className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-1.5 cursor-pointer"
+                                title="Marcar pedido como despachado"
+                              >
+                                <PackageCheck size={14} /> Despachar Envío
+                              </button>
+                            )}
+                            {ord.paymentStatus !== 'APPROVED' && (
+                              <>
+                                <button
+                                  onClick={() => handleUpdateOrderStatus(ord.id, 'APPROVED', 'APPROVED')}
+                                  className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-xs font-bold transition-colors"
+                                  title="Marcar como Aprobado"
+                                >
+                                  Aprobar
+                                </button>
+                                <button
+                                  onClick={() => handleUpdateOrderStatus(ord.id, 'CANCELLED', 'CANCELLED')}
+                                  className="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-lg text-xs font-bold transition-colors"
+                                  title="Marcar como Cancelado"
+                                >
+                                  Cancelar
+                                </button>
+                              </>
+                            )}
+                            <button
+                              onClick={() => confirmDelete(ord.id, 'orders')}
+                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                              title="Eliminar Pedido"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}

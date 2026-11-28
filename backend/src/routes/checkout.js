@@ -218,7 +218,7 @@ export async function completeOrderPayment(orderId, paymentId = null) {
     updatedAt: new Date(),
   }).where(eq(orders.id, orderId));
 
-  // 2. Notificación interna para el usuario
+  // 2. Notificación interna para el usuario y Alerta para el Administrador
   try {
     await db.insert(notifications).values({
       id: crypto.randomUUID(),
@@ -227,6 +227,18 @@ export async function completeOrderPayment(orderId, paymentId = null) {
       message: `Tu pedido #${order.id.slice(0, 8)} ha sido confirmado y está en preparación.`,
       createdAt: new Date(),
     });
+
+    // Alerta al panel del Administrador para despachar el envío
+    const adminUsers = await db.select().from(users).where(eq(users.role, 'ADMIN'));
+    for (const adm of adminUsers) {
+      await db.insert(notifications).values({
+        id: crypto.randomUUID(),
+        userId: adm.id,
+        title: '🚨 ¡Nuevo Pedido Pagado listo para despachar!',
+        message: `Orden #${order.id.slice(0, 8)} abonada por $${Number(order.totalAmount).toLocaleString('es-AR')}. ¡Preparar y despachar envío!`,
+        createdAt: new Date(),
+      }).onConflictDoNothing();
+    }
   } catch (err) {
     console.error('Error creando notificación:', err);
   }
