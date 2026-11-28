@@ -73,9 +73,10 @@ export default function InteractiveMap({ lat, lng, onLocationChange }) {
     });
 
     // Capa de tiles CARTO Voyager (calles nítidas, en español, sin bloqueos de dominio ni cuotas)
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png', {
       subdomains: 'abcd',
       maxZoom: 20,
+      crossOrigin: true,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
     }).addTo(map);
 
