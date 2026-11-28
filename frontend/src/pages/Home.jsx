@@ -139,7 +139,9 @@ export default function Home() {
 
   // Filtrado y ordenamiento de productos
   const filteredProducts = products.filter(product => {
-    const matchesCategory = selectedCategory === 'all' || product.categoryId === selectedCategory;
+    const activeCatObj = categories.find(c => c.id === selectedCategory || c.slug === selectedCategory);
+    const activeCatId = activeCatObj ? activeCatObj.id : selectedCategory;
+    const matchesCategory = selectedCategory === 'all' || product.categoryId === activeCatId;
     const matchesSearch = !searchQuery.trim() || 
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.description?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -264,18 +266,19 @@ export default function Home() {
               </button>
               {categories.map(cat => {
                 const count = products.filter(p => p.categoryId === cat.id).length;
+                const isSelected = selectedCategory === cat.id || selectedCategory === cat.slug;
                 return (
                   <button
                     key={cat.id}
                     onClick={() => setSelectedCategory(cat.id)}
                     className={`px-4 py-2 rounded-xl font-bold text-xs transition-all whitespace-nowrap flex items-center gap-2 cursor-pointer ${
-                      selectedCategory === cat.id
+                      isSelected
                         ? 'bg-[#3b0052] text-white shadow-md shadow-fuchsia-900/30'
                         : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
                     }`}
                   >
                     <span>{cat.name}</span>
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${selectedCategory === cat.id ? 'bg-fuchsia-900 text-fuchsia-200' : 'bg-slate-100 text-slate-500'}`}>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${isSelected ? 'bg-fuchsia-900 text-fuchsia-200' : 'bg-slate-100 text-slate-500'}`}>
                       {count}
                     </span>
                   </button>

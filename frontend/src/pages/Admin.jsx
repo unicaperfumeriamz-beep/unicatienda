@@ -1608,11 +1608,11 @@ export default function Admin() {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-8 pt-6 border-t border-white/10">
                 <div className="bg-white/5 rounded-2xl p-4 backdrop-blur-sm border border-white/10">
                   <span className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Productos Activos</span>
-                  <p className="text-2xl font-black text-white mt-1">{catalogStatus?.totalProducts || 199}</p>
+                  <p className="text-2xl font-black text-white mt-1">{catalogStatus?.totalProducts ?? 0}</p>
                 </div>
                 <div className="bg-white/5 rounded-2xl p-4 backdrop-blur-sm border border-white/10">
                   <span className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Categorías</span>
-                  <p className="text-2xl font-black text-rose-300 mt-1">{catalogStatus?.categoriesCount || 8}</p>
+                  <p className="text-2xl font-black text-rose-300 mt-1">{catalogStatus?.categoriesCount ?? 0}</p>
                 </div>
                 <div className="bg-white/5 rounded-2xl p-4 backdrop-blur-sm border border-white/10">
                   <span className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Páginas del Libro</span>

@@ -37,12 +37,14 @@ export default function Footer() {
           <div>
             <h3 className="font-bold text-white mb-4 text-xs tracking-widest uppercase font-serif text-fuchsia-300">Colecciones</h3>
             <ul className="space-y-2 text-sm text-zinc-400">
-              <li><Link to="/?category=perfumes-premium" className="hover:text-fuchsia-300 transition-colors">Perfumes Premium</Link></li>
-              <li><Link to="/?category=perfumes-arabes-premium" className="hover:text-fuchsia-300 transition-colors">Alta Perfumería Árabe</Link></li>
-              <li><Link to="/?category=fragancias-femeninas" className="hover:text-fuchsia-300 transition-colors">Fragancias Femeninas</Link></li>
-              <li><Link to="/?category=fragancias-masculinas" className="hover:text-fuchsia-300 transition-colors">Fragancias Masculinas</Link></li>
-              <li><Link to="/?category=difusores-hogar" className="hover:text-fuchsia-300 transition-colors">Difusores & Hogar</Link></li>
-              <li><Link to="/?category=oleos-esenciales-sumeria" className="hover:text-fuchsia-300 transition-colors">Óleos Sumeria</Link></li>
+              <li><Link to="/?category=perfumes-premium#catalogo" className="hover:text-fuchsia-300 transition-colors">Perfumes Premium</Link></li>
+              <li><Link to="/?category=perfumes-arabes-premium#catalogo" className="hover:text-fuchsia-300 transition-colors">Alta Perfumería Árabe</Link></li>
+              <li><Link to="/?category=fragancias-femeninas#catalogo" className="hover:text-fuchsia-300 transition-colors">Fragancias Femeninas</Link></li>
+              <li><Link to="/?category=fragancias-masculinas#catalogo" className="hover:text-fuchsia-300 transition-colors">Fragancias Masculinas</Link></li>
+              <li><Link to="/?category=ambiente-y-hogar#catalogo" className="hover:text-fuchsia-300 transition-colors">Difusores & Hogar</Link></li>
+              <li><Link to="/?category=sumeria-aromaterapia#catalogo" className="hover:text-fuchsia-300 transition-colors">Sumeria Bienestar</Link></li>
+              <li><Link to="/?category=cosmetica-y-unas#catalogo" className="hover:text-fuchsia-300 transition-colors">Cosmética & Uñas</Link></li>
+              <li><Link to="/?category=extrait-de-parfum#catalogo" className="hover:text-fuchsia-300 transition-colors">Extrait de Parfum</Link></li>
             </ul>
           </div>
 

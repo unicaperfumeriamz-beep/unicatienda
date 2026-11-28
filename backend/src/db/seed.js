@@ -50,24 +50,17 @@ export async function runSeed() {
     await db.delete(cartItems);
     await db.delete(orderItems);
     await db.delete(products);
+    await db.delete(categories);
 
     const categoryMap = new Map();
     for (const cat of catalog.categories) {
-      const existing = await db.select().from(categories).all();
-      const match = existing.find(c => c.slug === cat.slug);
-      let catId;
-      if (match) {
-        catId = match.id;
-        await db.update(categories).set({ name: cat.name }).where(eq(categories.id, catId));
-      } else {
-        catId = crypto.randomUUID();
-        await db.insert(categories).values({
-          id: catId,
-          name: cat.name,
-          slug: cat.slug,
-          createdAt: new Date(),
-        }).onConflictDoNothing();
-      }
+      const catId = crypto.randomUUID();
+      await db.insert(categories).values({
+        id: catId,
+        name: cat.name,
+        slug: cat.slug,
+        createdAt: new Date(),
+      }).onConflictDoNothing();
       categoryMap.set(cat.slug, catId);
     }
     console.log(`✅ ${categoryMap.size} Categorías sincronizadas`);
