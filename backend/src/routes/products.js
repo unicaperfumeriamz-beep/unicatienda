@@ -36,7 +36,7 @@ router.get('/:idOrSlug', async (req, res) => {
   try {
     const { idOrSlug } = req.params;
     const result = await db.select().from(products)
-      .where(sql`${products.id} = ${idOrSlug} OR ${products.slug} = ${idOrSlug}`)
+      .where(sql`${products.id} = ${idOrSlug} OR ${products.slug} = ${idOrSlug} OR UPPER(${products.sku}) = UPPER(${idOrSlug})`)
       .limit(1);
     
     if (result.length === 0) {

@@ -5,7 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { eq } from 'drizzle-orm';
 import { db } from './index.js';
-import { users, categories, products, banners, loyaltySettings } from './schema.js';
+import { users, categories, products, banners, loyaltySettings, cartItems, orderItems } from './schema.js';
 import { hashPassword } from '../utils/auth.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -17,16 +17,24 @@ export async function runSeed() {
   try {
     // 1. Usuario Administrador Único
     const adminPass = await hashPassword('mendo1234');
-    await db.delete(users).where(eq(users.role, 'ADMIN'));
-    await db.insert(users).values({
-      id: crypto.randomUUID(),
-      name: 'UNICA Perfumería',
-      email: 'unica.perfumeria.mz@gmail.com',
-      passwordHash: adminPass,
-      role: 'ADMIN',
-      points: 0,
-      createdAt: new Date(),
-    }).onConflictDoNothing();
+    const existingAdmin = await db.select().from(users).where(eq(users.email, 'unica.perfumeria.mz@gmail.com')).limit(1);
+    if (existingAdmin.length > 0) {
+      await db.update(users).set({
+        passwordHash: adminPass,
+        role: 'ADMIN',
+        name: 'UNICA Perfumería'
+      }).where(eq(users.email, 'unica.perfumeria.mz@gmail.com'));
+    } else {
+      await db.insert(users).values({
+        id: crypto.randomUUID(),
+        name: 'UNICA Perfumería',
+        email: 'unica.perfumeria.mz@gmail.com',
+        passwordHash: adminPass,
+        role: 'ADMIN',
+        points: 0,
+        createdAt: new Date(),
+      }).onConflictDoNothing();
+    }
     console.log('✅ Usuario administrador único listo: unica.perfumeria.mz@gmail.com');
 
     // 2. Cargar Catálogo UNICA 50
@@ -38,7 +46,11 @@ export async function runSeed() {
     const catalogRaw = fs.readFileSync(catalogPath, 'utf-8');
     const catalog = JSON.parse(catalogRaw);
 
-    // 3. Insertar o actualizar Categorías
+    // 3. Limpiar productos antiguos y sincronizar Categorías
+    await db.delete(cartItems);
+    await db.delete(orderItems);
+    await db.delete(products);
+
     const categoryMap = new Map();
     for (const cat of catalog.categories) {
       const existing = await db.select().from(categories).all();
@@ -46,6 +58,7 @@ export async function runSeed() {
       let catId;
       if (match) {
         catId = match.id;
+        await db.update(categories).set({ name: cat.name }).where(eq(categories.id, catId));
       } else {
         catId = crypto.randomUUID();
         await db.insert(categories).values({
@@ -59,17 +72,10 @@ export async function runSeed() {
     }
     console.log(`✅ ${categoryMap.size} Categorías sincronizadas`);
 
-    // 4. Insertar Productos en lotes
+    // 4. Insertar Productos Auditados en lotes
     let insertedCount = 0;
-    const existingProducts = await db.select().from(products).all();
-    const existingSkuMap = new Set(existingProducts.map(p => p.sku));
-
     const toInsert = [];
     for (const prod of catalog.products) {
-      if (existingSkuMap.has(prod.sku)) {
-        continue;
-      }
-
       const catId = categoryMap.get(prod.category_slug) || Array.from(categoryMap.values())[0];
 
       toInsert.push({
@@ -79,8 +85,8 @@ export async function runSeed() {
         description: prod.description,
         price: prod.price,
         promotionalPrice: prod.promotional_price,
-        stock: prod.stock || 40,
-        points: prod.points || Math.round(prod.price * 0.1),
+        stock: prod.stock || 45,
+        points: prod.points || 0,
         sku: prod.sku,
         imageUrl: prod.imageUrl,
         categoryId: catId,
@@ -90,8 +96,6 @@ export async function runSeed() {
         createdAt: new Date(),
         updatedAt: new Date(),
       });
-
-      existingSkuMap.add(prod.sku);
     }
 
     // Insertar en chunks optimizados
@@ -101,45 +105,43 @@ export async function runSeed() {
       await db.insert(products).values(chunk).onConflictDoNothing();
       insertedCount += chunk.length;
     }
-    console.log(`✅ ${insertedCount} Productos insertados del catálogo (${catalog.products.length} totales en catálogo)`);
+    console.log(`✅ ${insertedCount} Productos insertados del catálogo auditado (${catalog.products.length} totales en catálogo)`);
 
     // 5. Banners para la tienda UNICA Perfumería
-    const existingBanners = await db.select().from(banners).all();
-    if (existingBanners.length === 0) {
-      await db.insert(banners).values([
-        {
-          id: crypto.randomUUID(),
-          title: "Lanzamiento Unica Premium: Estilo Born in Roma",
-          subtitle: "Descubrí la nueva creación con neceser y perfumero de regalo. Edición Nº 50.",
-          buttonText: "Ver Lanzamiento",
-          buttonLink: "/product/f56740b9-ff83-44e8-ae84-b35043d0bc58",
-          imageUrl: "/catalog/page_2.jpg",
-          active: true,
-          createdAt: new Date(),
-        },
-        {
-          id: crypto.randomUUID(),
-          title: "Alta Perfumería Árabe: Estilo Torino 24",
-          subtitle: "120 ml de puro lujo oriental con notas de mango, bergamota y ciruela.",
-          buttonText: "Explorar Línea Árabe",
-          buttonLink: "/product/4d283fdc-2d6d-4425-b44e-2cc1fed07187",
-          imageUrl: "/catalog/page_3.jpg",
-          active: true,
-          createdAt: new Date(),
-        },
-        {
-          id: crypto.randomUUID(),
-          title: "Esencialmente Bueno: Edición Especial Nº 50",
-          subtitle: "Fragancias de alta graduación, difusores para el hogar y aromaterapia Sumeria.",
-          buttonText: "Comprar Ahora",
-          buttonLink: "/#catalogo",
-          imageUrl: "/catalog/page_86.jpg",
-          active: true,
-          createdAt: new Date(),
-        }
-      ]);
-      console.log('✅ Banners promocionales creados');
-    }
+    await db.delete(banners);
+    await db.insert(banners).values([
+      {
+        id: crypto.randomUUID(),
+        title: "Lanzamiento UNICA Premium: Estilo Born in Roma",
+        subtitle: "Descubrí la nueva creación con neceser y perfumero de regalo. Edición Nº 50.",
+        buttonText: "Ver Lanzamiento",
+        buttonLink: "/product/MBRUPP",
+        imageUrl: "/catalog/page_2.jpg",
+        active: true,
+        createdAt: new Date(),
+      },
+      {
+        id: crypto.randomUUID(),
+        title: "Alta Perfumería Árabe: Estilo Torino 24",
+        subtitle: "120 ml de puro lujo oriental con notas de mango, bergamota y ciruela.",
+        buttonText: "Explorar Línea Árabe",
+        buttonLink: "/product/UTO24",
+        imageUrl: "/catalog/page_3.jpg",
+        active: true,
+        createdAt: new Date(),
+      },
+      {
+        id: crypto.randomUUID(),
+        title: "Lanzamiento Especial: La Vida es Bella L'Elixir",
+        subtitle: "90 ml con neceser UNICA y perfumero recargable de regalo.",
+        buttonText: "Ver Lanzamiento",
+        buttonLink: "/product/FVBLE",
+        imageUrl: "/catalog/page_86.jpg",
+        active: true,
+        createdAt: new Date(),
+      }
+    ]);
+    console.log('✅ Banners promocionales actualizados con enlaces directos verificados');
 
     // 6. Configuración de Fidelidad (Puntos)
     const existingLoyalty = await db.select().from(loyaltySettings).all();
