@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import api from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { MapPin, Navigation, Compass, CheckCircle2, ChevronRight, CreditCard, ShieldCheck, Truck, ShoppingBag, ArrowRight, ExternalLink } from 'lucide-react';
+import { MapPin, Navigation, Compass, CheckCircle2, ChevronRight, CreditCard, ShieldCheck, Truck, ShoppingBag, ArrowRight, ExternalLink, Sparkles } from 'lucide-react';
+import InteractiveMap from '../components/InteractiveMap';
 
 export default function Checkout() {
   const { user } = useAuth();
@@ -43,9 +44,26 @@ export default function Checkout() {
     }
   }, [user]);
 
+  const handleMapLocationChange = ({ lat, lng, street, number, city, postalCode }) => {
+    setAddressForm(prev => ({
+      ...prev,
+      lat,
+      lng,
+      hasGeo: true,
+      street: street !== undefined && street !== '' ? street : prev.street,
+      number: number !== undefined && number !== '' ? number : prev.number,
+      city: city !== undefined && city !== '' ? city : prev.city,
+      postalCode: postalCode !== undefined && postalCode !== '' ? postalCode : prev.postalCode,
+    }));
+    setGeoMsg({
+      type: 'success',
+      text: `Ubicación marcada en el mapa (${lat.toFixed(5)}, ${lng.toFixed(5)}).`
+    });
+  };
+
   const handleGetLiveLocation = () => {
     if (!('geolocation' in navigator)) {
-      setGeoMsg({ type: 'error', text: 'Tu dispositivo o navegador no soporta geolocalización GPS.' });
+      setGeoMsg({ type: 'info', text: 'Tu dispositivo no tiene sensor GPS activo. Puedes mover el pin rojo directamente en el mapa.' });
       return;
     }
     setLocating(true);
@@ -64,7 +82,7 @@ export default function Checkout() {
         setLocating(false);
         setGeoMsg({
           type: 'success',
-          text: `Ubicación GPS precisa fijada (Precisión: ±${Math.round(accuracy)}m).`
+          text: `Ubicación GPS fijada con éxito (Precisión: ±${Math.round(accuracy)}m).`
         });
 
         // Intentar autocompletar calle mediante reverse geocoding
@@ -74,7 +92,7 @@ export default function Checkout() {
           if (data && data.address) {
             const road = data.address.road || data.address.pedestrian || data.address.neighbourhood || '';
             const houseNumber = data.address.house_number || '';
-            const city = data.address.city || data.address.town || data.address.village || data.address.county || 'Mendoza';
+            const city = data.address.city || data.address.town || data.address.village || data.address.suburb || data.address.county || 'Mendoza';
             const postcode = data.address.postcode || '';
             setAddressForm(prev => ({
               ...prev,
@@ -88,12 +106,18 @@ export default function Checkout() {
       },
       (err) => {
         setLocating(false);
+        let msg = 'No se pudo acceder al sensor GPS. ¡No te preocupes! Haz clic o arrastra el pin rojo en el mapa.';
+        if (err.code === 1) {
+          msg = 'Permiso GPS bloqueado en el navegador. Haz clic o arrastra el pin directamente sobre tu calle en el mapa.';
+        } else if (err.code === 2) {
+          msg = 'Señal GPS no disponible. Puedes mover el pin rojo libremente en el mapa interactivo.';
+        }
         setGeoMsg({
-          type: 'error',
-          text: 'No se pudo obtener la señal GPS: ' + (err.message || 'Permiso denegado por el navegador')
+          type: 'info',
+          text: msg
         });
       },
-      { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   };
 
@@ -322,7 +346,7 @@ export default function Checkout() {
                   ></textarea>
                 </div>
 
-                {/* Mapa Interactivo con Ubicación Precisa */}
+                {/* Mapa Interactivo con Leaflet y Ubicación Precisa */}
                 <div className="pt-2">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
@@ -330,7 +354,7 @@ export default function Checkout() {
                       Punto de Entrega en el Mapa
                       {addressForm.hasGeo && (
                         <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-md">
-                          GPS Activo
+                          GPS / Pin Activo
                         </span>
                       )}
                     </span>
@@ -345,35 +369,33 @@ export default function Checkout() {
                     </a>
                   </div>
 
-                  <div className="w-full h-56 sm:h-64 rounded-2xl overflow-hidden border-2 border-slate-200 relative shadow-inner bg-slate-100">
-                    <iframe
-                      title="Mapa de Entrega"
-                      width="100%"
-                      height="100%"
-                      frameBorder="0"
-                      scrolling="no"
-                      marginHeight="0"
-                      marginWidth="0"
-                      src={`https://www.openstreetmap.org/export/embed.html?bbox=${addressForm.lng - 0.008}%2C${addressForm.lat - 0.005}%2C${addressForm.lng + 0.008}%2C${addressForm.lat + 0.005}&layer=mapnik&marker=${addressForm.lat}%2C${addressForm.lng}`}
-                      className="w-full h-full"
-                    ></iframe>
-                    
-                    {/* Tarjeta de Coordenadas flotante */}
-                    <div className="absolute bottom-2.5 left-2.5 right-2.5 sm:right-auto bg-white/95 backdrop-blur-md px-3.5 py-2 rounded-xl shadow-lg border border-slate-200 text-xs flex items-center justify-between gap-3">
-                      <div>
-                        <p className="font-bold text-slate-800">
-                          {addressForm.street ? `${addressForm.street} ${addressForm.number || ''}` : 'Ubicación seleccionada'}
-                        </p>
-                        <p className="text-[11px] text-slate-500 font-mono">
-                          Lat: {addressForm.lat.toFixed(5)} | Lng: {addressForm.lng.toFixed(5)}
-                        </p>
-                      </div>
+                  {/* Componente de Mapa Interactivo */}
+                  <InteractiveMap 
+                    lat={addressForm.lat} 
+                    lng={addressForm.lng} 
+                    onLocationChange={handleMapLocationChange} 
+                  />
+
+                  {/* Tarjeta de Coordenadas y Estado debajo del mapa */}
+                  <div className="mt-2.5 bg-slate-50 border border-slate-200 px-4 py-2.5 rounded-xl text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                    <div>
+                      <p className="font-bold text-slate-800">
+                        {addressForm.street ? `${addressForm.street} ${addressForm.number || ''}` : 'Ubicación seleccionada'}
+                        {addressForm.city ? `, ${addressForm.city}` : ''}
+                      </p>
+                      <p className="text-[11px] text-slate-500 font-mono">
+                        Lat: {addressForm.lat.toFixed(5)} | Lng: {addressForm.lng.toFixed(5)} {addressForm.accuracy ? `(±${addressForm.accuracy}m)` : ''}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
                       <button
                         type="button"
                         onClick={handleGetLiveLocation}
-                        className="text-[11px] font-bold text-fuchsia-700 hover:text-fuchsia-900 bg-fuchsia-50 hover:bg-fuchsia-100 px-2.5 py-1.5 rounded-lg border border-fuchsia-200 transition-colors cursor-pointer"
+                        disabled={locating}
+                        className="text-xs font-bold text-fuchsia-700 hover:text-fuchsia-900 bg-white hover:bg-fuchsia-50 px-3 py-1.5 rounded-lg border border-fuchsia-200 transition-colors cursor-pointer shadow-xs flex items-center gap-1.5"
                       >
-                        Recalcular GPS
+                        <Navigation size={13} className={locating ? 'animate-spin' : ''} />
+                        {locating ? 'Detectando...' : 'Centrar con GPS'}
                       </button>
                     </div>
                   </div>
