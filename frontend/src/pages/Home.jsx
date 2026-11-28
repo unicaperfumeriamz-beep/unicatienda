@@ -17,7 +17,9 @@ import {
   Check, 
   Tag, 
   SlidersHorizontal,
-  PackageOpen
+  PackageOpen,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 
 export default function Home() {
@@ -29,6 +31,8 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('default');
   const [viewMode, setViewMode] = useState(() => localStorage.getItem('preferred_view_mode') || 'grid');
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 20;
 
   const { user } = useAuth();
   const { addToCart } = useCart();
@@ -154,6 +158,44 @@ export default function Home() {
     if (sortBy === 'promo') return (b.promotionalPrice ? 1 : 0) - (a.promotionalPrice ? 1 : 0);
     return 0;
   });
+
+  // Reset de página cuando cambian los filtros
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory, searchQuery, sortBy, urlOfertas]);
+
+  // Cálculos de paginación
+  const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE) || 1;
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, filteredProducts.length);
+  const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
+
+  const handlePageChange = (newPage) => {
+    if (newPage < 1 || newPage > totalPages) return;
+    setCurrentPage(newPage);
+    const el = document.getElementById('catalogo');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const getPaginationPages = () => {
+    const pages = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (currentPage > 3) pages.push('...');
+      const start = Math.max(2, currentPage - 1);
+      const end = Math.min(totalPages - 1, currentPage + 1);
+      for (let i = start; i <= end; i++) {
+        if (!pages.includes(i)) pages.push(i);
+      }
+      if (currentPage < totalPages - 2) pages.push('...');
+      if (!pages.includes(totalPages)) pages.push(totalPages);
+    }
+    return pages;
+  };
 
   return (
     <div className="w-full relative bg-slate-50 min-h-screen pb-24 font-sans selection:bg-blue-100">
@@ -361,8 +403,13 @@ export default function Home() {
         {/* Indicador de resultados */}
         <div className="flex items-center justify-between mb-6">
           <p className="text-sm font-semibold text-slate-500">
-            Mostrando <span className="text-slate-900 font-bold">{filteredProducts.length}</span> {filteredProducts.length === 1 ? 'producto' : 'productos'}
+            Mostrando <span className="text-slate-900 font-bold">{filteredProducts.length > 0 ? `${startIndex + 1} - ${endIndex}` : '0'}</span> de <span className="text-slate-900 font-bold">{filteredProducts.length}</span> {filteredProducts.length === 1 ? 'producto' : 'productos'}
           </p>
+          {totalPages > 1 && (
+            <span className="text-xs font-bold text-fuchsia-950 bg-fuchsia-100/80 px-3 py-1 rounded-full border border-fuchsia-200">
+              Página {currentPage} de {totalPages}
+            </span>
+          )}
         </div>
 
         {/* Contenedor de Productos */}
@@ -408,8 +455,8 @@ export default function Home() {
           /* ======================================================== */
           /* MODO CUADRÍCULA (GRID VIEW)                               */
           /* ======================================================== */
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5 pb-20">
-            {filteredProducts.map(product => {
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5 pb-12">
+            {paginatedProducts.map(product => {
               const catObj = categories.find(c => c.id === product.categoryId);
               return (
                 <div 
@@ -510,8 +557,8 @@ export default function Home() {
           /* ======================================================== */
           /* MODO LISTA (LIST VIEW) - MÁXIMA AGUDEZA VISUAL           */
           /* ======================================================== */
-          <div className="flex flex-col gap-4 pb-20">
-            {filteredProducts.map(product => {
+          <div className="flex flex-col gap-4 pb-12">
+            {paginatedProducts.map(product => {
               const catObj = categories.find(c => c.id === product.categoryId);
               return (
                 <div 
@@ -613,6 +660,56 @@ export default function Home() {
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {/* Paginación - 20 productos por página */}
+        {totalPages > 1 && (
+          <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm">
+            <span className="text-xs text-slate-500 font-medium text-center sm:text-left">
+              Página <strong className="text-slate-800 font-bold">{currentPage}</strong> de <strong className="text-slate-800 font-bold">{totalPages}</strong> (Mostrando {startIndex + 1} a {endIndex} de {filteredProducts.length} productos)
+            </span>
+            <div className="flex items-center gap-1.5 flex-wrap justify-center">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="px-3 py-2 rounded-xl text-xs font-bold border border-slate-200 text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 transition-all cursor-pointer"
+                title="Página anterior"
+              >
+                <ChevronLeft size={16} />
+                <span className="hidden sm:inline">Anterior</span>
+              </button>
+
+              {getPaginationPages().map((page, idx) => (
+                typeof page === 'number' ? (
+                  <button
+                    key={idx}
+                    onClick={() => handlePageChange(page)}
+                    className={`w-9 h-9 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      currentPage === page
+                        ? 'bg-[#3b0052] text-white shadow-md shadow-fuchsia-950/30 font-black'
+                        : 'border border-slate-200 text-slate-700 hover:bg-slate-100 bg-white'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ) : (
+                  <span key={idx} className="px-1 text-slate-400 font-bold text-xs select-none">
+                    ...
+                  </span>
+                )
+              ))}
+
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="px-3 py-2 rounded-xl text-xs font-bold border border-slate-200 text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 transition-all cursor-pointer"
+                title="Página siguiente"
+              >
+                <span className="hidden sm:inline">Siguiente</span>
+                <ChevronRight size={16} />
+              </button>
+            </div>
           </div>
         )}
 
