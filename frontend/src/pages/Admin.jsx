@@ -462,10 +462,7 @@ export default function Admin() {
             <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 tracking-wide">Cupones</span>
           </button>
           
-          <button onClick={() => setActiveTab('loyalty')} className={`w-full flex items-center gap-4 px-3 py-3 rounded-lg font-medium transition-colors ${activeTab === 'loyalty' ? 'bg-emerald-500 text-zinc-900 font-bold' : 'hover:bg-zinc-800 hover:text-white'}`}>
-            <div className="min-w-[1.5rem] flex justify-center"><Gift size={24} /></div>
-            <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 tracking-wide">Programa de Puntos</span>
-          </button>
+          {/* Puntos desactivados por regla comercial de UNICA */}
           <button onClick={() => setActiveTab('referrals')} className={`w-full flex items-center gap-4 px-3 py-3 rounded-lg font-medium transition-colors ${activeTab === 'referrals' ? 'bg-emerald-500 text-zinc-900 font-bold' : 'hover:bg-zinc-800 hover:text-white'}`}>
             <div className="min-w-[1.5rem] flex justify-center"><Users size={24} /></div>
             <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 tracking-wide">Programa Referidos</span>
@@ -546,9 +543,6 @@ export default function Admin() {
                 </button>
                 <button onClick={() => { setActiveTab('coupons'); setMobileMenuOpen(false); }} className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg font-medium text-sm transition-colors ${activeTab === 'coupons' ? 'bg-emerald-500 text-zinc-900 font-bold' : 'hover:bg-zinc-800 hover:text-white'}`}>
                   <Tag size={18} /> <span>Cupones</span>
-                </button>
-                <button onClick={() => { setActiveTab('loyalty'); setMobileMenuOpen(false); }} className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg font-medium text-sm transition-colors ${activeTab === 'loyalty' ? 'bg-emerald-500 text-zinc-900 font-bold' : 'hover:bg-zinc-800 hover:text-white'}`}>
-                  <Gift size={18} /> <span>Programa de Puntos</span>
                 </button>
                 <button onClick={() => { setActiveTab('referrals'); setMobileMenuOpen(false); }} className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg font-medium text-sm transition-colors ${activeTab === 'referrals' ? 'bg-emerald-500 text-zinc-900 font-bold' : 'hover:bg-zinc-800 hover:text-white'}`}>
                   <Users size={18} /> <span>Programa Referidos</span>

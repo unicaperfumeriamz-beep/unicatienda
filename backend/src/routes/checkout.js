@@ -40,8 +40,8 @@ router.post('/create-order', authenticate, async (req, res) => {
     const productIds = items.map(item => item.productId);
     const dbProducts = await db.select().from(products).where(inArray(products.id, productIds));
     
-    let totalAmount = 0;
-    let totalPointsAwarded = 0;
+    let subtotalAmount = 0;
+    const totalUnits = items.reduce((acc, i) => acc + i.quantity, 0);
     const orderItemsData = [];
     const mpItems = [];
 
@@ -51,8 +51,7 @@ router.post('/create-order', authenticate, async (req, res) => {
         return res.status(400).json({ success: false, message: `Product ${product?.name || 'unknown'} is unavailable or out of stock` });
       }
 
-      totalAmount += product.price * item.quantity;
-      totalPointsAwarded += (product.points || 0) * item.quantity;
+      subtotalAmount += product.price * item.quantity;
       orderItemsData.push({
         id: crypto.randomUUID(),
         productId: product.id,
@@ -69,7 +68,29 @@ router.post('/create-order', authenticate, async (req, res) => {
       });
     }
 
+    let totalAmount = subtotalAmount;
+
+    // Regla de Descuentos por Volumen de UNICA Perfumería:
+    // A partir de 5 productos: 10% de descuento
+    // A partir de 10 productos: 20% de descuento y envío bonificado
+    let volumeDiscountPercentage = 0;
+    let shippingBonified = false;
+
+    if (totalUnits >= 10) {
+      volumeDiscountPercentage = 20;
+      shippingBonified = true;
+    } else if (totalUnits >= 5) {
+      volumeDiscountPercentage = 10;
+    }
+
+    let volumeDiscountAmount = 0;
+    if (volumeDiscountPercentage > 0) {
+      volumeDiscountAmount = (subtotalAmount * volumeDiscountPercentage) / 100;
+      totalAmount -= volumeDiscountAmount;
+    }
+
     let appliedCouponObj = null;
+    let couponDiscountVal = 0;
     if (couponCode) {
       const couponResult = await db.select().from(coupons).where(and(eq(coupons.code, couponCode.toUpperCase()), eq(coupons.active, true))).limit(1);
       if (couponResult.length > 0) {
@@ -81,22 +102,24 @@ router.post('/create-order', authenticate, async (req, res) => {
 
         if (isNotExpired && usageResult.length === 0) {
           appliedCouponObj = coupon;
-          let discountVal = 0;
           if (coupon.discountPercentage) {
-            discountVal = (totalAmount * coupon.discountPercentage) / 100;
+            couponDiscountVal = (totalAmount * coupon.discountPercentage) / 100;
           } else if (coupon.discountAmount) {
-            discountVal = coupon.discountAmount;
+            couponDiscountVal = coupon.discountAmount;
           }
-          if (discountVal > totalAmount) discountVal = totalAmount; // Prevent negative total
+          if (couponDiscountVal > totalAmount) couponDiscountVal = totalAmount; // Prevent negative total
           
-          totalAmount -= discountVal;
-          
-          // MP Discount mock: reduce the unit price proportionally
-          const factor = totalAmount === 0 ? 0 : 1 - (discountVal / (totalAmount + discountVal));
-          for (let mi of mpItems) {
-            mi.unit_price = Number((mi.unit_price * factor).toFixed(2));
-          }
+          totalAmount -= couponDiscountVal;
         }
+      }
+    }
+
+    // Ajustar proporcionalmente los unit_price de mpItems para que Mercado Pago cobre el importe final exacto
+    const totalDiscountAmount = volumeDiscountAmount + couponDiscountVal;
+    if (totalDiscountAmount > 0 && subtotalAmount > 0) {
+      const factor = totalAmount / subtotalAmount;
+      for (let mi of mpItems) {
+        mi.unit_price = Number((mi.unit_price * factor).toFixed(2));
       }
     }
 
@@ -136,7 +159,7 @@ router.post('/create-order', authenticate, async (req, res) => {
       return res.status(400).json({ success: false, message: 'Error en Mercado Pago: ' + (mpError.message || 'Error desconocido') });
     }
 
-    // Guardar orden (los puntos quedan registrados para ser acreditados UNICAMENTE cuando el pago se apruebe)
+    // Guardar orden
     await db.insert(orders).values({
       id: orderId,
       userId,
@@ -145,7 +168,7 @@ router.post('/create-order', authenticate, async (req, res) => {
       paymentStatus: 'PENDING',
       shippingAddress,
       mpPreferenceId: preferenceId,
-      pointsAwarded: totalPointsAwarded,
+      pointsAwarded: 0,
       createdAt: new Date(),
     });
 
@@ -195,23 +218,13 @@ export async function completeOrderPayment(orderId, paymentId = null) {
     updatedAt: new Date(),
   }).where(eq(orders.id, orderId));
 
-  // 2. Sumar puntos al usuario UNICAMENTE tras compra completada y aprobada
-  const pointsToAward = order.pointsAwarded || 0;
-  if (pointsToAward > 0) {
-    const userRec = await db.select().from(users).where(eq(users.id, order.userId)).limit(1);
-    if (userRec.length > 0) {
-      const currentPoints = userRec[0].points || 0;
-      await db.update(users).set({ points: currentPoints + pointsToAward }).where(eq(users.id, order.userId));
-    }
-  }
-
-  // 3. Crear notificación interna para el usuario
+  // 2. Notificación interna para el usuario
   try {
     await db.insert(notifications).values({
       id: crypto.randomUUID(),
       userId: order.userId,
       title: '¡Pago Aprobado!',
-      message: `Tu pedido #${order.id.slice(0, 8)} ha sido confirmado.${pointsToAward > 0 ? ` ¡Sumaste ${pointsToAward} puntos por tu compra!` : ''}`,
+      message: `Tu pedido #${order.id.slice(0, 8)} ha sido confirmado y está en preparación.`,
       createdAt: new Date(),
     });
   } catch (err) {

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
-import { ShoppingCart, CheckCircle2, AlertCircle, X, ShieldCheck, Truck, ArrowLeft, Tag, Star, Gift } from 'lucide-react';
+import { ShoppingCart, CheckCircle2, AlertCircle, X, ShieldCheck, Truck, ArrowLeft, Tag, Star, Gift, Sparkles } from 'lucide-react';
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -160,12 +160,17 @@ export default function ProductDetail() {
               )}
               
               <span className="text-sm font-medium text-emerald-600 block mt-2">en hasta 12x sin interés con Mercado Pago</span>
-              {product.points > 0 && (
-                <div className="mt-2 bg-amber-50/80 border border-amber-200 px-3 py-1.5 rounded-lg inline-flex items-center gap-2">
-                  <Gift size={16} className="text-amber-500" />
-                  <span className="text-sm font-bold text-amber-800">Sumas {product.points} puntos UNICA</span>
+              {/* Promoción Especial por Cantidad */}
+              <div className="mt-4 bg-gradient-to-r from-fuchsia-50 to-pink-50 border border-fuchsia-200/80 p-3.5 rounded-xl">
+                <p className="text-xs font-bold text-fuchsia-950 flex items-center gap-1.5 mb-1.5">
+                  <Sparkles size={14} className="text-amber-500" />
+                  <span>Promoción Especial por Cantidad:</span>
+                </p>
+                <div className="space-y-1 text-xs text-fuchsia-900/90 font-medium">
+                  <p>• Llevando <strong className="text-fuchsia-950 font-bold">5 o más unidades:</strong> <strong className="text-emerald-700 font-bold">10% de DESCUENTO</strong></p>
+                  <p>• Llevando <strong className="text-fuchsia-950 font-bold">10 o más unidades:</strong> <strong className="text-emerald-700 font-bold">20% de DESCUENTO</strong> y <strong className="text-emerald-700 font-bold">ENVÍO BONIFICADO</strong></p>
                 </div>
-              )}
+              </div>
             </div>
 
             <div className="flex items-center gap-3 text-zinc-700 text-sm font-semibold mb-1">

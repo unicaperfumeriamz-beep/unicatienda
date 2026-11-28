@@ -50,7 +50,7 @@ export default function Footer() {
           <div>
             <h3 className="font-bold text-white mb-4 text-xs tracking-widest uppercase font-serif text-fuchsia-300">Servicios</h3>
             <ul className="space-y-2 text-sm text-zinc-400">
-              <li><Link to="/referrals" className="hover:text-fuchsia-300 transition-colors">Programa de Puntos y Referidos</Link></li>
+              <li><Link to="/referrals" className="hover:text-fuchsia-300 transition-colors">Programa de Referidos y Promociones</Link></li>
               <li><Link to="/orders" className="hover:text-fuchsia-300 transition-colors">Mis Pedidos</Link></li>
               <li><Link to="/cart" className="hover:text-fuchsia-300 transition-colors">Mi Carrito de Compras</Link></li>
               <li><Link to="/profile" className="hover:text-fuchsia-300 transition-colors">Mi Perfil y Contraseña</Link></li>

@@ -99,8 +99,8 @@ export default function Profile() {
                 )}
               </div>
               <p className="text-zinc-300 text-sm mt-1">{user.email}</p>
-              <div className="inline-flex items-center gap-1.5 mt-3 px-3 py-1 rounded-full bg-white/10 text-amber-300 text-xs font-bold border border-white/10">
-                <Gift size={14} /> Puntos acumulados: {user.points || 0} pts UNICA
+              <div className="inline-flex items-center gap-1.5 mt-3 px-3 py-1 rounded-full bg-white/10 text-fuchsia-200 text-xs font-bold border border-white/10">
+                <Sparkles size={14} className="text-amber-400" /> Cliente Exclusivo UNICA
               </div>
             </div>
           </div>

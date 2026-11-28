@@ -49,7 +49,7 @@ export default function Orders() {
             });
             if (res.data.success) {
               if (res.data.pointsAwarded > 0) {
-                toast.success(`¡Pago completado! Sumaste ${res.data.pointsAwarded} puntos.`);
+                toast.success('¡Pago completado con éxito! Tu pedido está confirmado.');
               } else {
                 toast.success('¡Pago completado con éxito!');
               }

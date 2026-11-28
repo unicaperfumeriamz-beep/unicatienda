@@ -98,6 +98,8 @@ export default function Navbar() {
             <ShinyText text="ESENCIALMENTE BUENO" speed={4} className="text-amber-300 font-serif tracking-widest text-[11px]" />
             <span className="hidden sm:inline text-zinc-600">•</span>
             <span className="hidden sm:inline text-zinc-400">Edición Oficial Nº 50</span>
+            <span className="hidden lg:inline text-zinc-600">•</span>
+            <span className="hidden lg:inline text-fuchsia-300 font-medium">5+ un: <strong>10% OFF</strong> | 10+ un: <strong>20% OFF + Envío Bonificado</strong></span>
           </div>
           <div className="flex items-center gap-4">
             <a 
@@ -177,9 +179,6 @@ export default function Navbar() {
                       <div className="px-4 py-2 border-b border-fuchsia-950/80 mb-2">
                         <p className="text-white font-bold">{user.name}</p>
                         <p className="text-zinc-400 text-xs truncate">{user.email}</p>
-                      </div>
-                      <div className="px-4 py-2 mb-2 flex items-center gap-2 text-amber-300 font-black text-xs">
-                        <Gift size={16} /> {user.points || 0} pts UNICA
                       </div>
                       <Link to="/profile" className="flex items-center gap-2 px-4 py-2 text-zinc-300 hover:bg-fuchsia-950/60 hover:text-white transition-colors">
                         <Settings size={16} />

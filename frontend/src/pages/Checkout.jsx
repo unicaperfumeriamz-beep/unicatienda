@@ -72,9 +72,16 @@ export default function Checkout() {
   };
 
   const totalAmount = cartData ? cartData.totalAmount : 0;
+  const totalUnits = cartData?.items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
+  
+  // Regla comercial UNICA: 5+ -> 10% OFF, 10+ -> 20% OFF + Envío Bonificado
+  const volumeDiscountPercent = totalUnits >= 10 ? 20 : totalUnits >= 5 ? 10 : 0;
+  const shippingBonified = totalUnits >= 10;
+  const volumeDiscount = (totalAmount * volumeDiscountPercent) / 100;
+
   // Apply visual discount if coupon is present (simplified for UI purposes)
-  const discountVisual = couponCode ? totalAmount * 0.1 : 0; // Just a visual mock of 10% if there's a coupon passed
-  const finalTotal = totalAmount - discountVisual;
+  const discountVisual = couponCode ? (totalAmount - volumeDiscount) * 0.1 : 0;
+  const finalTotal = Math.max(0, totalAmount - volumeDiscount - discountVisual);
 
   if (loadingCart) {
     return (
@@ -257,13 +264,31 @@ export default function Checkout() {
 
               <div className="border-t border-slate-100 pt-6 space-y-3">
                 <div className="flex justify-between text-slate-500">
-                  <span>Productos ({cartData?.items?.length || 0})</span>
+                  <span>Productos ({totalUnits})</span>
                   <span className="font-semibold text-slate-700">${totalAmount.toLocaleString('es-AR')}</span>
                 </div>
-                <div className="flex justify-between text-slate-500">
+
+                {volumeDiscount > 0 && (
+                  <div className="flex justify-between text-fuchsia-700 font-bold bg-fuchsia-50 p-2.5 rounded-xl border border-fuchsia-200">
+                    <span className="flex items-center gap-1.5 text-xs">
+                      <Sparkles size={14} className="text-amber-500" />
+                      Descuento por volumen ({volumeDiscountPercent}% OFF)
+                    </span>
+                    <span>-${volumeDiscount.toLocaleString('es-AR')}</span>
+                  </div>
+                )}
+
+                <div className="flex justify-between items-center text-slate-500">
                   <span>Envío</span>
-                  <span className="font-semibold text-zinc-700">A coordinar</span>
+                  {shippingBonified ? (
+                    <span className="font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded text-xs border border-emerald-200 flex items-center gap-1">
+                      <CheckCircle2 size={13} /> ¡Bonificado!
+                    </span>
+                  ) : (
+                    <span className="font-semibold text-zinc-700">A coordinar</span>
+                  )}
                 </div>
+
                 {discountVisual > 0 && (
                   <div className="flex justify-between text-emerald-600 font-medium">
                     <span>Cupón de descuento</span>

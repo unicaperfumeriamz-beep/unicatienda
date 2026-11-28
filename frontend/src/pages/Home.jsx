@@ -219,10 +219,13 @@ export default function Home() {
               <p className="text-fuchsia-100/90 max-w-lg text-base">Descubrí las colecciones Premium, Árabe, Difusores y Aromaterapia Sumeria de la Edición Nº 50.</p>
             </div>
             <div className="flex justify-center">
-              <div className="bg-white/10 border border-fuchsia-500/30 backdrop-blur-md p-6 rounded-3xl text-center shadow-xl">
-                <Gift className="w-12 h-12 text-amber-300 mx-auto mb-2" />
-                <p className="font-bold text-lg font-serif">Puntos UNICA</p>
-                <p className="text-xs text-fuchsia-200 mt-1">¡Suma 10% en puntos con cada compra!</p>
+              <div className="bg-white/10 border border-fuchsia-500/30 backdrop-blur-md p-6 rounded-3xl text-center shadow-xl max-w-xs">
+                <Sparkles className="w-10 h-10 text-amber-300 mx-auto mb-2" />
+                <p className="font-bold text-lg font-serif text-white">Promo por Cantidad</p>
+                <div className="text-xs text-fuchsia-200 mt-2 space-y-1">
+                  <p><strong className="text-amber-300 font-bold">5+ unidades:</strong> 10% de DESCUENTO</p>
+                  <p><strong className="text-emerald-300 font-bold">10+ unidades:</strong> 20% OFF + Envío Bonificado</p>
+                </div>
               </div>
             </div>
           </div>
@@ -315,7 +318,6 @@ export default function Home() {
                 <option value="default">Más relevantes</option>
                 <option value="price-asc">Menor precio</option>
                 <option value="price-desc">Mayor precio</option>
-                <option value="points-desc">Más puntos</option>
               </select>
             </div>
 
@@ -426,11 +428,9 @@ export default function Home() {
                       <span></span>
                     )}
 
-                    {product.points > 0 && (
-                      <span className="bg-emerald-600 text-white text-[10px] font-black px-2 py-0.5 rounded-md shadow-xs flex items-center gap-1 ml-auto">
-                        <Gift size={11} /> +{product.points} pts
-                      </span>
-                    )}
+                    <span className="bg-[#170020]/90 text-amber-300 border border-fuchsia-500/30 text-[9px] font-bold px-1.5 py-0.5 rounded shadow-xs ml-auto">
+                      5+ un: 10% OFF
+                    </span>
                   </div>
 
                   {/* Imagen del producto */}
@@ -549,11 +549,9 @@ export default function Home() {
                           {catObj.name}
                         </span>
                       )}
-                      {product.points > 0 && (
-                        <span className="text-xs font-bold px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 flex items-center gap-1">
-                          <Gift size={13} /> Sumas {product.points} puntos de recompensa
-                        </span>
-                      )}
+                      <span className="text-xs font-bold px-2.5 py-0.5 rounded-md bg-fuchsia-50 text-fuchsia-800 border border-fuchsia-200 flex items-center gap-1">
+                        <Sparkles size={13} className="text-amber-500" /> 5+ un: 10% OFF | 10+ un: 20% OFF + Envío Bonificado
+                      </span>
                     </div>
 
                     <h3 className="text-xl md:text-2xl font-black text-slate-900 group-hover:text-blue-600 transition-colors">

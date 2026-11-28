@@ -107,8 +107,8 @@ export default function Login() {
           {mode === 'forgot' && 'Recuperar Contraseña'}
         </h2>
         <p className="text-xs text-zinc-500 mt-1">
-          {mode === 'login' && 'Accede a tus pedidos, catálogo y puntos acumulados'}
-          {mode === 'register' && 'Únete para comprar fragancias y acumular puntos'}
+          {mode === 'login' && 'Accede a tus pedidos, catálogo y promociones exclusivas'}
+          {mode === 'register' && 'Únete para comprar fragancias con descuentos por cantidad'}
           {mode === 'forgot' && 'Ingresa tu correo y elige tu nueva clave de acceso'}
         </p>
       </div>
